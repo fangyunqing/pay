@@ -35,7 +35,6 @@ def print_msg(msg):
 def set_in_screen_center(tk_widget, win_width=None, win_height=None):
     # 获取根窗口
     root = tk_widget
-    temp_root = None
     while 1:
         temp_root = root.master
         if temp_root is None:
@@ -85,9 +84,8 @@ def choice(angle):
 
     child = tk.Toplevel(window)
     child.title("设置")
-    child.grab_set()
     child.transient(window)
-    child.iconbitmap('ico/bitbug_favicon.ico')
+    child.iconbitmap('ico/small.ico')
     set_in_screen_center(child, win_width=400)
     bt_choice_dir = tk.Button(child, text="选择文件夹", command=choice_dir)
     bt_choice_dir.place(x=10, y=10)
@@ -132,6 +130,26 @@ def set_use_option(angle):
         fr_info[key] = val
         tk.Label(fr, text=text, ).grid(row=row, column=0, padx=10, pady=5)
         tk.Entry(fr, textvariable=val).grid(row=row, column=1)
+        tk.Button(fr, text="...", command=lambda: show_detail(val)).grid(row=row, column=2, padx=10)
+
+    def show_detail(val):
+
+        def ok():
+            val.set(tx.get("1.0", tk.END))
+            detail.destroy()
+
+        detail = tk.Toplevel(child)
+        detail.title("文本")
+        detail.transient(child)
+        detail.iconbitmap('ico/small.ico')
+        set_in_screen_center(detail, win_width=400, win_height=400)
+        tx = tk.Text(detail)
+        tx.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        tx.insert(tk.END, val.get())
+        frr = tk.Frame(detail)
+        frr.pack()
+        tk.Button(frr, text="保存", command=ok).pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+        tk.Button(frr, text="取消", command=lambda: detail.destroy()).pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
     try:
         if angle not in option_list:
@@ -139,10 +157,9 @@ def set_use_option(angle):
 
         child = tk.Toplevel(window)
         child.title("设置常用项")
-        child.grab_set()
         child.transient(window)
-        child.iconbitmap('ico/bitbug_favicon.ico')
-        set_in_screen_center(child, win_width=400, win_height=370)
+        child.iconbitmap('ico/small.ico')
+        set_in_screen_center(child, win_width=400, win_height=400)
 
         option_set = option_list.get(angle)
 
@@ -180,9 +197,14 @@ def set_use_option(angle):
             row_index = row_index + 1
             create_option("type_column", "供应商类型列号", 1, row=row_index)
             row_index = row_index + 1
-            create_option("date_location", "截止时间位置(行列,从1开始)", 0, row=row_index)
+            create_option("date_location", "截止时间位置(行列)", 0, row=row_index)
             row_index = row_index + 1
-            create_option("title_rows", "标题行数", 1, row=row_index)
+            create_option("sort_column", "排序列", 1, row=row_index)
+            row_index = row_index + 1
+            if angle == "group":
+                create_option("dept", "部门", 0, row=row_index)
+                row_index = row_index + 1
+            create_option("check", "校对", 0, row=row_index)
     except Exception as e:
         print_exception(e)
 
@@ -199,7 +221,6 @@ def thread_func(info_list):
     tx_msg.delete(1.0, tk.END)
     window.attributes("-disabled", True)
     begin_time = time.time()
-    md = ModelUtil("supplier")
     try:
         for info in info_list:
             pay_manager.parse(info[3], info[4], info[0], info[1], callback, target=info[2])
@@ -234,7 +255,7 @@ def start():
 window = tk.Tk()
 set_in_screen_center(window, 380, 500)
 window.resizable(0, 0)
-window.iconbitmap('ico/bitbug_favicon.ico')
+window.iconbitmap('ico/small.ico')
 window.title("财务工具")
 # 供应商
 ck_supplier_val = tk.IntVar()

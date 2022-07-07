@@ -11,28 +11,29 @@ import pandas as pd
 
 class SupplierPay(AbstractPay):
 
-    def _write_excel(self, target_file, df_list):
-        write_info = super(SupplierPay, self)._write_excel(target_file, df_list)
-        with pd.ExcelWriter(target_file, engine='openpyxl', mode='a', if_sheet_exists="overlay") as writer:
-            sheet_name, start_row = self["write_detail_sheet"].split(",")
-            df_list[1].to_excel(writer,
-                                startrow=int(start_row),
-                                sheet_name=sheet_name,
-                                header=None,
-                                index=None)
+    def _sheet_info(self):
+        sheet_info_list = super(SupplierPay, self)._sheet_info()
+        sheet_name, start_row = self["write_detail_sheet"].split(",")
+        sheet_info_list.append((sheet_name, int(start_row)))
+        return sheet_info_list
 
-        write_info.append((len(df_list[1].index), len(df_list[1].columns), int(start_row), target_file, sheet_name))
-        return write_info
-
-    def _parse(self, df_list):
-        for index, df in enumerate(df_list):
+    def _parse(self, df_dict):
+        df_list = []
+        for key in df_dict.keys():
+            df = df_dict[key]
             # dept type supplier 分组合计
-            df_list[index] = df.groupby([self.dept_column, self["type_column"], self["supplier_column"]], as_index=False).sum()
+            df_group = df.groupby([self.dept_column, self["type_column"], self["supplier_column"]],
+                                  as_index=False).sum()
+            # 排序
+            self.sort(df_group)
+            # 加入队列
+            df_list.append(df_group)
         # 明细
         df_detail_total = pd.concat(df_list)
         # 去除dept列
         df_total = df_detail_total.drop([self.dept_column], axis=1, errors="ignore")
         # 根据type和supplier分组合计
+        df_total_dict = {}
         df_total_list = []
         df_top_total_list = []
         df_total = df_total.groupby([self["type_column"], self["supplier_column"]], as_index=False).sum()
@@ -42,7 +43,11 @@ class SupplierPay(AbstractPay):
             df_type_total = df_type.groupby(self["type_column"], as_index=False).sum()
             df_type_total.insert(column=self["supplier_column"], value="", loc=1)
             df_type_total[self["type_column"]] = type_name + "汇总"
-            df_total_list.append(pd.concat([df_type_total, df_type]))
+            df = pd.concat([df_type_total, df_type])
+            # 排序
+            self.sort(df)
+            df_total_dict[type_name] = df
+            df_type_total[self["type_column"]] = type_name
             df_top_total_list.append(df_type_total)
         # 根据supplier分组合计
         df_top_total = pd.concat(df_top_total_list)
@@ -50,17 +55,9 @@ class SupplierPay(AbstractPay):
         df_top_total_total = df_top_total.groupby([self["supplier_column"]], as_index=False).sum()
         df_top_total_total.insert(column=self["type_column"], value="", loc=0)
         df_top_total_total[self["supplier_column"]] = "合计"
+        self.sort(df_top_total)
+        for type_name in df_top_total[self["type_column"]]:
+            if type_name in df_total_dict.keys():
+                df_total_list.append(df_total_dict[type_name])
         df_total = pd.concat([df_top_total_total, df_top_total, pd.concat(df_total_list)])
         return [df_total, df_detail_total]
-
-
-
-
-
-
-
-
-
-
-
-
