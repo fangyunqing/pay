@@ -11,6 +11,7 @@ from pay.group.group_pay import GroupPay
 import shutil
 from util.model_util import ModelUtil
 import time
+import uuid
 
 
 class PayManager:
@@ -74,7 +75,11 @@ class PayManager:
         else:
             target_file = path + r"/target/" + prefix_date + "target" + os.path.splitext(template_file)[1]
         callback("开始拷贝模板文件[%s]到[%s]" % (template_file, target_file))
-        shutil.copyfile(template_file, target_file)
+        if os.path.isfile(target_file):
+            uid = uuid.uuid1()
+            tmp_file = target_file + "_" + str(uid)
+            shutil.move(target_file, tmp_file)
+        shutil.copy(template_file, target_file)
         # 分析文件
         callback("开始分析文件")
         attribute_data = ModelUtil(angle).read_file_only(model_name)

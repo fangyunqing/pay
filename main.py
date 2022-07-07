@@ -10,8 +10,13 @@ from util.model_util import ModelUtil
 
 
 def save():
-    md = ModelUtil("pay")
-    md.write_file("default", option_list)
+    md = ModelUtil("pay_tool")
+    md.write_file("default", option_list, prefix="@@")
+
+
+def reload():
+    md = ModelUtil("pay_tool")
+    md.read_file("default", option_list, prefix="@@")
 
 
 def print_exception(e):
@@ -60,7 +65,7 @@ def choice(angle):
             current_dir = filedialog.askdirectory()
             if current_dir:
                 str_dir.set(current_dir)
-                option_set["dir"] = current_dir
+                option_set["parse_dir"] = current_dir
         except Exception as e:
             print_exception(e)
 
@@ -69,7 +74,7 @@ def choice(angle):
             current_file = filedialog.askopenfilename(filetypes=[('xlsx', '*.xlsx'), ('xls', '*.xls')], )
             if current_file:
                 str_file.set(current_file)
-                option_set["file"] = current_file
+                option_set["model_file"] = current_file
         except Exception as e:
             print_exception(e)
 
@@ -87,19 +92,19 @@ def choice(angle):
     bt_choice_dir = tk.Button(child, text="选择文件夹", command=choice_dir)
     bt_choice_dir.place(x=10, y=10)
     str_dir = tk.StringVar()
-    str_dir.set(option_set.get("dir", ""))
-    et_dir = tk.Entry(child, show=None, width=50, textvariable=str_dir, justify='left')
+    str_dir.set(option_set.get("parse_dir", ""))
+    et_dir = tk.Entry(child, show=None, width=50, textvariable=str_dir, justify='left', state="readonly")
     et_dir.place(x=10, y=50)
     bt_choice_file = tk.Button(child, text="选择模板文件", command=choice_file)
     bt_choice_file.place(x=10, y=90)
     str_file = tk.StringVar()
-    str_file.set(option_set.get("file", ""))
-    et_file = tk.Entry(child, show=None, width=50, textvariable=str_file, justify='left')
+    str_file.set(option_set.get("model_file", ""))
+    et_file = tk.Entry(child, show=None, width=50, textvariable=str_file, justify='left', state="readonly")
     et_file.place(x=10, y=130)
 
 
 def set_use_option(angle):
-    def save():
+    def model_save():
         try:
             model_name = cb_model.get()
             md.write_file(model_name, fr_dict)
@@ -137,7 +142,7 @@ def set_use_option(angle):
         child.grab_set()
         child.transient(window)
         child.iconbitmap('ico/bitbug_favicon.ico')
-        set_in_screen_center(child, win_width=400, win_height=350)
+        set_in_screen_center(child, win_width=400, win_height=370)
 
         option_set = option_list.get(angle)
 
@@ -149,7 +154,7 @@ def set_use_option(angle):
         cb_model = ttk.Combobox(pl_bottom)
         cb_model.bind("<<ComboboxSelected>>", model_select)
         cb_model.grid(padx=10)
-        tk.Button(pl_bottom, text="保存", command=save).grid(row=0, column=1, padx=10)
+        tk.Button(pl_bottom, text="保存", command=model_save).grid(row=0, column=1, padx=10)
 
         md = ModelUtil(angle)
         cb_model["values"] = md.model_list
@@ -209,10 +214,12 @@ def thread_func(info_list):
 def start():
     info_list = []
     for key in option_list:
+        if key == "model_file":
+            continue
         value = option_list[key]
         val = value.get("val").get()
-        path = value.get("dir", "").strip()
-        model = value.get("file", "").strip()
+        path = value.get("parse_dir", "").strip()
+        model = value.get("model_file", "").strip()
         target = value.get("target", "").strip()
         model_file = value.get("model_name").get()
         if val == 1 and len(path) > 0 and len(model) > 0:
@@ -228,6 +235,7 @@ window = tk.Tk()
 set_in_screen_center(window, 380, 500)
 window.resizable(0, 0)
 window.iconbitmap('ico/bitbug_favicon.ico')
+window.title("财务工具")
 # 供应商
 ck_supplier_val = tk.IntVar()
 ck_supplier = tk.Checkbutton(window,
@@ -261,23 +269,32 @@ bt_start = tk.Button(window, text="开始", command=start)
 bt_start.place(x=10, y=90)
 bt_start = tk.Button(window, text="保存配置项", command=save)
 bt_start.place(x=50, y=90)
+bt_start = tk.Button(window, text="读取配置项", command=reload)
+bt_start.place(x=130, y=90)
 pg = ttk.Progressbar(window)
 pg.place(x=10, y=140)
 pg.pack_forget()
 pg['length'] = 350
 tx_msg = tk.Text(window, height=24, width=52)
 tx_msg.place(x=1, y=220, anchor='nw')
+
 # 全局配置项
 option_list = {
     "supplier": {"val": ck_supplier_val,
+                 "parse_dir": "",
+                 "model_file": "",
                  "target": "供应商维度",
                  "option": ["应付汇总", "预付汇总"],
-                 "model_name": cb_supplier},
+                 "model_name": cb_supplier
+                 }
+    ,
     "group": {"val": ck_group_val,
+              "parse_dir": "",
+              "model_file": "",
               "target": "集团维度",
               "option": ["应付汇总", "应付未付款", "预付汇总"],
-              "model_name": cb_group}
+              "model_name": cb_group
+              }
 }
-mdd = ModelUtil("pay")
-mdd.read_file("default", option_list)
+
 window.mainloop()

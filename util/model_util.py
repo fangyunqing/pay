@@ -28,11 +28,21 @@ class ModelUtil:
         with open(model_name_path, mode="r", encoding="utf-8") as f:
             return json.load(f)
 
-    def write_file(self, model_name, data):
+    def write_file(self, model_name, data, prefix=None):
         model_name_path = os.path.join(self.model_dir, model_name) + ".json"
         f_data = {}
+        if prefix is None:
+            prefix = ""
         for pay_name in data.keys():
-            f_data[pay_name] = {key: value.get() if hasattr(value, "get") else value for key, value in data[pay_name].items()}
+            f_data_dict = {}
+            f_data[pay_name] = f_data_dict
+            for key, value in data[pay_name].items():
+                if hasattr(value, "get"):
+                    f_data_dict[key] = value.get()
+                elif isinstance(value, str):
+                    f_data_dict[key] = prefix + value + prefix
+                else:
+                    f_data_dict[key] = value
 
         with open(model_name_path, mode="wt", encoding="utf-8") as f:
             json.dump(f_data, f, ensure_ascii=False)
@@ -40,7 +50,7 @@ class ModelUtil:
         if model_name not in self.model_list:
             self.model_list.append(model_name)
 
-    def read_file(self, model_name, data):
+    def read_file(self, model_name, data, prefix=None):
         model_name_path = os.path.join(self.model_dir, model_name) + ".json"
         try:
             with open(model_name_path, mode="r", encoding="utf-8") as f:
@@ -52,7 +62,13 @@ class ModelUtil:
             if pay_name in data.keys():
                 for key in f_data[pay_name].keys():
                     if key in data[pay_name].keys():
+                        val = f_data[pay_name][key]
+                        if isinstance(val, str) and prefix is not None:
+                            if val.startswith(prefix):
+                                val = val[len(prefix):]
+                            if val.endswith(prefix):
+                                val = val[0:-len(prefix)]
                         if hasattr(data[pay_name][key], "set"):
-                            data[pay_name][key].set(f_data[pay_name][key])
+                            data[pay_name][key].set(val)
                         else:
-                            data[pay_name][key] = f_data[pay_name][key]
+                            data[pay_name][key] = val

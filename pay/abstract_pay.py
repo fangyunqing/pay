@@ -11,6 +11,7 @@ import pandas as pd
 import xlwings as xl
 import os
 import calendar
+import pythoncom
 
 
 class AbstractPay(metaclass=ABCMeta):
@@ -76,6 +77,7 @@ class AbstractPay(metaclass=ABCMeta):
             self._set_style(df_row, df_column, start_row, target_file, sheet_name)
 
     def _set_style(self, df_len, df_column, start_row, target_file, sheet_name):
+        pythoncom.CoInitialize()
         app = xl.App(visible=False, add_book=False)
         try:
             app.display_alerts = False
@@ -138,9 +140,7 @@ class AbstractPay(metaclass=ABCMeta):
                     merge_rng.merge()
                     merge_rng.api.HorizontalAlignment = -4108
                     merge_rng.api.VerticalAlignment = -4108
-
-                sheet.range((row_begin - self["title_rows"], column_begin), (row_end, column_end)).autofit()
-                # 写入截止日志
+                # 写入截止时间
                 prefix_date = os.path.basename(target_file)[:6]
                 last_day = calendar.monthrange(int(prefix_date[:4]), int(prefix_date[4:6]))[1]
                 last = prefix_date[:4] + r"/" + prefix_date[4:6] + "/" + str(last_day)
@@ -150,10 +150,10 @@ class AbstractPay(metaclass=ABCMeta):
                 date_rng.font.bold = True
                 date_rng.font.size = 14
                 date_rng.font.name = "微软雅黑"
-                date_rng.autofit()
             finally:
                 wb.save()
                 wb.close()
         finally:
             app.quit()
             app.kill()
+            pythoncom.CoUninitialize()
