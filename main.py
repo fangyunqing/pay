@@ -242,9 +242,9 @@ def start():
         path = value.get("parse_dir", "").strip()
         model = value.get("model_file", "").strip()
         target = value.get("target", "").strip()
-        model_file = value.get("model_name").get()
+        model_name = value.get("model_name").get()
         if val == 1 and len(path) > 0 and len(model) > 0:
-            info_list.append((path, model, target, key, model_file))
+            info_list.append((path, model, target, key, model_name))
 
     if len(info_list) > 0:
         t = threading.Thread(target=thread_func, args=(info_list,))

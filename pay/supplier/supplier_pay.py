@@ -30,6 +30,11 @@ class SupplierPay(AbstractPay):
             df_list.append(df_group)
         # 明细
         df_detail_total = pd.concat(df_list)
+        df_top_detail_total = df_detail_total.drop([self.dept_column, self["type_column"], self["supplier_column"]],
+                                                   axis=1, errors="ignore").sum().to_frame().T
+        df_top_detail_total.insert(column=self["supplier_column"], value="", loc=0)
+        df_top_detail_total.insert(column=self["type_column"], value="", loc=0)
+        df_top_detail_total.insert(column=self.dept_column, value="", loc=0)
         # 去除dept列
         df_total = df_detail_total.drop([self.dept_column], axis=1, errors="ignore")
         # 根据type和supplier分组合计
@@ -60,4 +65,4 @@ class SupplierPay(AbstractPay):
             if type_name in df_total_dict.keys():
                 df_total_list.append(df_total_dict[type_name])
         df_total = pd.concat([df_top_total_total, df_top_total, pd.concat(df_total_list)])
-        return [df_total, df_detail_total]
+        return [df_total, pd.concat([df_top_detail_total, df_detail_total])]

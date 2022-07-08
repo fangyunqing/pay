@@ -26,7 +26,13 @@ class ModelUtil:
     def read_file_only(self, model_name):
         model_name_path = os.path.join(self.model_dir, model_name) + ".json"
         with open(model_name_path, mode="r", encoding="utf-8") as f:
-            return json.load(f)
+            f_data = json.load(f)
+        for k1 in f_data.keys():
+            for k2 in f_data[k1].keys():
+                val = f_data[k1][k2]
+                if isinstance(val, str):
+                    f_data[k1][k2] = val.strip().replace('\n', '').replace('\r', '')
+        return f_data
 
     def write_file(self, model_name, data, prefix=None):
         model_name_path = os.path.join(self.model_dir, model_name) + ".json"
@@ -63,6 +69,8 @@ class ModelUtil:
                 for key in f_data[pay_name].keys():
                     if key in data[pay_name].keys():
                         val = f_data[pay_name][key]
+                        if isinstance(val, str):
+                            val = val.strip().replace('\n', '').replace('\r', '')
                         if isinstance(val, str) and prefix is not None:
                             if val.startswith(prefix):
                                 val = val[len(prefix):]

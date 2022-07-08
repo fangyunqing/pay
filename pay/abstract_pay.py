@@ -60,13 +60,22 @@ class AbstractPay(metaclass=ABCMeta):
         for key in file_dict:
             dept_file = []
             for file in file_dict[key]:
-                df = pd.read_excel(file, sheet_name=self["read_sheet"], skiprows=self["skip_rows"], header=None)
+                try:
+                    df = pd.read_excel(file, sheet_name=self["read_sheet"], skiprows=self["skip_rows"], header=None)
+                except ValueError as ve:
+                    raise Exception("[%s]读取工作簿[%s]发现异常[%s]" % (file, self["read_sheet"], repr(ve)))
                 useless_column = []
                 for value in df.columns:
                     if str(value) not in self["use_column"]:
                         useless_column.append(value)
+                # 去除空格
+                df[self["supplier_column"]].str.strip()
+                df[self["type_column"]].str.strip()
                 # 去除供应商无用的行
                 df.drop(df[df[self["supplier_column"]].isin(self.get_supplier_useless_field())].index,
+                        inplace=True)
+                # 去除type中无用的行
+                df.drop(df[(df[self["type_column"]] == "总计") | (df[self["type_column"]].str.contains("汇总"))].index,
                         inplace=True)
                 # 添加编制单位列
                 df.insert(column=self.dept_column, value=key, loc=0)
@@ -111,7 +120,7 @@ class AbstractPay(metaclass=ABCMeta):
                     column_all = df_describe[self._column]
                     rng = sheet.range((row_begin, column_begin), (row_end, column_all))
                     # 隐藏0 保留小数位0
-                    rng.number_format = '[=0]"";0'
+                    rng.number_format = '[=0]"";###,###'
                     rng.api.Borders(7).Weight = 2
                     rng.api.Borders(7).LineStyle = 1
                     rng.api.Borders(8).Weight = 2
@@ -160,9 +169,6 @@ class AbstractPay(metaclass=ABCMeta):
                     date_rng.font.bold = True
                     date_rng.font.size = 14
                     date_rng.font.name = "微软雅黑"
-
-
-
                 finally:
                     wb.save()
                     wb.close()
@@ -231,4 +237,3 @@ class AbstractPay(metaclass=ABCMeta):
     def _sheet_info(self):
         sheet_name, start_row = self["write_sheet"].split(",")
         return [(sheet_name, int(start_row))]
-
