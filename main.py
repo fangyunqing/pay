@@ -184,26 +184,26 @@ def set_use_option(angle):
             option_note.add(fr, text=name)
             create_option("read_sheet", "读取的工作簿名称", 0, row=row_index)
             row_index = row_index + 1
-            create_option("write_sheet", "写入的工作簿名称", 0, row=row_index)
-            row_index = row_index + 1
-            if angle == "supplier":
-                create_option("write_detail_sheet", "写入的详情工作簿名称", 0, row=row_index)
-                row_index = row_index + 1
-            create_option("use_column", "需要的列(从0开始,逗号分隔)", 0, row=row_index)
-            row_index = row_index + 1
             create_option("skip_rows", "跳过的行数", 1, row=row_index)
             row_index = row_index + 1
-            create_option("supplier_column", "供应商列号", 1, row=row_index)
-            row_index = row_index + 1
-            create_option("type_column", "供应商类型列号", 1, row=row_index)
-            row_index = row_index + 1
-            create_option("date_location", "截止时间位置(行列)", 0, row=row_index)
+            create_option("use_column", "需要的列(从0开始,逗号分隔)", 0, row=row_index)
             row_index = row_index + 1
             create_option("sort_column", "排序列", 1, row=row_index)
             row_index = row_index + 1
             if angle == "group":
                 create_option("dept", "部门", 0, row=row_index)
                 row_index = row_index + 1
+            create_option("supplier_column", "供应商列号", 1, row=row_index)
+            row_index = row_index + 1
+            create_option("type_column", "供应商类型列号", 1, row=row_index)
+            row_index = row_index + 1
+            create_option("write_sheet", "写入的工作簿名称", 0, row=row_index)
+            row_index = row_index + 1
+            if angle == "supplier":
+                create_option("write_detail_sheet", "写入的详情工作簿名称", 0, row=row_index)
+                row_index = row_index + 1
+            create_option("date_location", "截止时间位置(行列)", 0, row=row_index)
+            row_index = row_index + 1
             create_option("check", "校对", 0, row=row_index)
     except Exception as e:
         print_exception(e)

@@ -59,11 +59,18 @@ class AbstractPay(metaclass=ABCMeta):
         df_dict = {}
         for key in file_dict:
             dept_file = []
+
             for file in file_dict[key]:
-                try:
-                    df = pd.read_excel(file, sheet_name=self["read_sheet"], skiprows=self["skip_rows"], header=None)
-                except ValueError as ve:
-                    raise Exception("[%s]读取工作簿[%s]发现异常[%s]" % (file, self["read_sheet"], repr(ve)))
+                df = None
+                df_read_dict = pd.read_excel(file, sheet_name=None, skiprows=self["skip_rows"], header=None)
+                for sheet_name in df_read_dict.keys():
+                    if sheet_name.strip() == self["read_sheet"]:
+                        df = df_read_dict[sheet_name]
+                        break
+
+                if df is None:
+                    raise Exception("[%s]中无法找工作簿[%s]" % (file, self["read_sheet"]))
+
                 useless_column = []
                 for value in df.columns:
                     if str(value) not in self["use_column"]:
