@@ -18,6 +18,7 @@ class PayManager:
 
     def __init__(self):
         self.calls = 3
+        self.pay_list = [SupplierPay(), GroupPay()]
 
     @staticmethod
     def _is_ignore_file(file):
@@ -64,7 +65,7 @@ class PayManager:
             except ValueError:
                 continue
         if prefix_date is None:
-            raise Exception("从文件中没有发现可用的时间")
+            raise Exception("从文件标题没有发现可用的时间")
         # 创建文件夹
         target_dir = path + r"/target/"
         if not os.path.isdir(target_dir):
@@ -83,11 +84,9 @@ class PayManager:
         # 分析文件
         callback("开始分析文件")
         attribute_data = ModelUtil(angle).read_file_only(model_name)
-        for pay_name in attribute_data:
-            if angle == "supplier":
-                pay = SupplierPay(attribute_dict=attribute_data[pay_name])
-            else:
-                pay = GroupPay(attribute_dict=attribute_data[pay_name])
-            pay.parse(file_dict, target_file)
-
-
+        for pay in self.pay_list:
+            p, p_n = pay.pay_name()
+            if p == angle:
+                for pay_name in attribute_data:
+                    pay.attribute_dict = attribute_data[pay_name]
+                    pay.parse(file_dict, target_file)

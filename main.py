@@ -255,7 +255,7 @@ def start():
 window = tk.Tk()
 set_in_screen_center(window, 380, 500)
 window.resizable(0, 0)
-window.iconbitmap('ico/small.ico')
+#window.iconbitmap('ico/small.ico')
 window.title("财务工具")
 # 供应商
 ck_supplier_val = tk.IntVar()

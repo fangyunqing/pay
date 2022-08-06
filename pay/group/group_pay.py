@@ -11,9 +11,18 @@ import pandas as pd
 
 class GroupPay(AbstractPay):
 
-    def __init__(self, attribute_dict):
-        super(GroupPay, self).__init__(attribute_dict)
+    def pay_options(self):
+        return ("pay", "应付汇总"), ("prepay", "预付汇总"), ("no-pay", "应付未付款")
+
+    def pay_name(self):
+        return "group", "集团"
+
+    def __init__(self):
+        super(GroupPay, self).__init__()
         self.first_merge = True
+        self.dept = "dept"
+        self._insert_attribute("sort_column",
+                               {"name": "dept", "text": "部门", "type": "str"})
 
     def _parse(self, df_dict):
         for key in df_dict.keys():

@@ -51,7 +51,7 @@ class ModelUtil:
                     f_data_dict[key] = value
 
         with open(model_name_path, mode="wt", encoding="utf-8") as f:
-            json.dump(f_data, f, ensure_ascii=False)
+            json.dump(f_data, f, ensure_ascii=False, indent=4)
 
         if model_name not in self.model_list:
             self.model_list.append(model_name)

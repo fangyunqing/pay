@@ -11,6 +11,18 @@ import pandas as pd
 
 class SupplierPay(AbstractPay):
 
+    def pay_options(self):
+        return ("pay", "应付汇总"), ("prepay", "预付汇总")
+
+    def __init__(self):
+        super(SupplierPay, self).__init__()
+        self.write_detail_sheet = "write_detail_sheet"
+        self._insert_attribute("write_sheet",
+                               {"name": "write_detail_sheet", "text": "写入的详情工作簿名称", "type": "str"})
+
+    def pay_name(self):
+        return "supplier", "供应商"
+
     def _sheet_info(self):
         sheet_info_list = super(SupplierPay, self)._sheet_info()
         sheet_name, start_row = self["write_detail_sheet"].split(",")
@@ -47,7 +59,7 @@ class SupplierPay(AbstractPay):
             # 根据type分组合计
             df_type_total = df_type.groupby(self["type_column"], as_index=False).sum()
             df_type_total.insert(column=self["supplier_column"], value="", loc=1)
-            df_type_total[self["type_column"]] = type_name + "汇总"
+            df_type_total[self["type_column"]] = str(type_name) + "汇总"
             df = pd.concat([df_type_total, df_type])
             # 排序
             self.sort(df)

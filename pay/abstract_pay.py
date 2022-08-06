@@ -15,21 +15,79 @@ import pythoncom
 
 
 class AbstractPay(metaclass=ABCMeta):
-    _df = "df"
-    _start_row = "start_row"
-    _row = "row"
-    _column = "column"
-    _total_row = "total_row"
-    _first_row_index = "first_row_index"
-    _sheet_name = "sheet_name"
-    _target_file = "target_file"
-    _detail = "detail"
 
-    def __init__(self, attribute_dict):
-        self.attribute_dict = attribute_dict
+    def __init__(self):
+        self.attribute_dict = {}
         self.dept_column = "dept"
         self.check_column = "check"
         self.first_merge = False
+        # 属性字段
+        self.read_sheet = "read_sheet"
+        self.skip_rows = "skip_rows"
+        self.use_column = "use_column"
+        self.sort_column = "sort_column"
+        self.supplier_column = "supplier_column"
+        self.type_column = "type_column"
+        self.write_sheet = "write_sheet"
+        self.date_location = "date_location"
+        self.check = "check"
+        self.attribute_list = [
+            {
+                "name": "read_sheet",
+                "text": "读取的工作簿名称",
+                "type": "str"
+            },
+            {
+                "name": "skip_rows",
+                "text": "跳过的行数",
+                "type": "int"
+            },
+            {
+                "name": "use_column",
+                "text": "需要的列(从0开始,逗号分隔)",
+                "type": "str"
+            },
+            {
+                "name": "sort_column",
+                "text": "排序列",
+                "type": "int"
+            },
+            {
+                "name": "supplier_column",
+                "text": "供应商列号",
+                "type": "int"
+            },
+            {
+                "name": "type_column",
+                "text": "供应商类型列号",
+                "type": "int"
+            },
+            {
+                "name": "write_sheet",
+                "text": "写入的工作簿名称",
+                "type": "str"
+            },
+            {
+                "name": "date_location",
+                "text": "截止时间位置(从0开始,行列 eg:3,4)",
+                "type": "str"
+            },
+            {
+                "name": "check",
+                "text": "校对",
+                "type": "str"
+            },
+        ]
+        # 描述字段
+        self._df = "df"
+        self._start_row = "start_row"
+        self._row = "row"
+        self._column = "column"
+        self._total_row = "total_row"
+        self._first_row_index = "first_row_index"
+        self._sheet_name = "sheet_name"
+        self._target_file = "target_file"
+        self._detail = "detail"
 
     def __getitem__(self, item):
         try:
@@ -64,7 +122,7 @@ class AbstractPay(metaclass=ABCMeta):
                 df = None
                 df_read_dict = pd.read_excel(file, sheet_name=None, skiprows=self["skip_rows"], header=None)
                 for sheet_name in df_read_dict.keys():
-                    if sheet_name.strip() == self["read_sheet"]:
+                    if sheet_name.strip() == self["read_sheet"] or sheet_name.strip() == self["read_sheet"] + "-" + key:
                         df = df_read_dict[sheet_name]
                         break
 
@@ -244,3 +302,17 @@ class AbstractPay(metaclass=ABCMeta):
     def _sheet_info(self):
         sheet_name, start_row = self["write_sheet"].split(",")
         return [(sheet_name, int(start_row))]
+
+    @abstractmethod
+    def pay_name(self):
+        pass
+
+    @abstractmethod
+    def pay_options(self):
+        pass
+
+    def _insert_attribute(self, attribute_name, attribute):
+        find_index = [index for index, attribute in enumerate(self.attribute_list)
+                      if attribute["name"] == attribute_name]
+        if len(find_index) > 0:
+            self.attribute_list.insert(find_index[0], attribute)
