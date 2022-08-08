@@ -134,6 +134,8 @@ class AbstractPay(metaclass=ABCMeta):
                     if str(value) not in self["use_column"]:
                         useless_column.append(value)
                 # 去除空格
+                df[self["supplier_column"]] = df[self["supplier_column"]].astype(str)
+                df[self["type_column"]] = df[self["type_column"]].astype(str)
                 df[self["supplier_column"]].str.strip()
                 df[self["type_column"]].str.strip()
                 # 去除供应商无用的行

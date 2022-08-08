@@ -112,7 +112,7 @@ class HomeFrame(ttk.Frame):
         except Exception as e:
             traceback.print_exc()
             err_msg = repr(e) + "\n" + traceback.format_exc()
-            Messagebox.show_error(message=err_msg, title="错误")
+            self.winfo_toplevel().after(100, func=lambda: Messagebox.show_error(err_msg))
         finally:
             self.pb_parse["value"] = 0
             self.winfo_toplevel().attributes("-disabled", False)
