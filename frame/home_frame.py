@@ -12,7 +12,9 @@ import ttkbootstrap as ttk
 from frame.home_choose_frame import HomeChooseFrame
 from util.model_util import ModelUtil
 import traceback
+from pay.log_handler.text_log_handler import TextLogHandler
 from ttkbootstrap.dialogs.dialogs import Messagebox
+import loguru
 
 
 class HomeFrame(ttk.Frame):
@@ -55,6 +57,7 @@ class HomeFrame(ttk.Frame):
         message_fr.pack(side=ttk.TOP, fill=ttk.BOTH, expand=ttk.YES)
         self.tx_msg = ttk.Text(master=message_fr)
         self.tx_msg.pack(side=ttk.TOP, fill=ttk.BOTH, expand=ttk.YES, padx=5, pady=5)
+        loguru.logger.add(TextLogHandler(self.tx_msg), format="{time:YYYY-MM-DD HH:mm:ss:SSS} | {level} | {message}")
 
     def store_option(self):
         option_dict = {}
@@ -110,9 +113,9 @@ class HomeFrame(ttk.Frame):
                                        target=options.get("target"))
             self.print_msg("总共用时：{:.2f}秒".format(time.time() - begin_time))
         except Exception as e:
-            traceback.print_exc()
-            err_msg = repr(e) + "\n" + traceback.format_exc()
-            self.winfo_toplevel().after(100, func=lambda: Messagebox.show_error(err_msg))
+            msg = str(e)
+            self.winfo_toplevel().after(100, func=lambda: Messagebox.show_error(msg))
+            loguru.logger.exception(msg)
         finally:
             self.pb_parse["value"] = 0
             self.winfo_toplevel().attributes("-disabled", False)

@@ -63,13 +63,13 @@ class SetFrame(ttk.Frame):
                 self.option_data[pay_option[1]] = option_value
                 for attribute in f_pay.attribute_list:
                     cf = LabelEditFrame(master=tab_fr,
-                                        label_text=attribute["text"],
+                                        label_text=attribute.text,
                                         button_command="detail",
-                                        entry_type=attribute["type"],
+                                        entry_type=attribute.data_type,
                                         label_width=12,
                                         label_wrap_length=80)
                     cf.pack(side=ttk.TOP, fill=ttk.X)
-                    option_value[attribute["name"]] = cf.value
+                    option_value[attribute.name] = cf.value
 
     def model_select(self, event):
         self.mu.read_file(self.str_model.get(), self.option_data)

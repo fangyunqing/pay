@@ -19,20 +19,20 @@ class PrimaryFrame(ttk.Frame):
         super().__init__(master, **kwargs)
         self.pack(fill=ttk.BOTH, expand=ttk.YES)
         self.pay_manager = PayManager()
-        self.image_path = Path(__file__).parent.parent / 'assets'
+        self.image_path = 'assets'
         # 按钮信息
         self.buttons = [
             {
                 "name": "home",
                 "zh_name": "主页",
                 "frame": HomeFrame(self, self.pay_manager),
-                "image": ttk.PhotoImage(name="home", file=self.image_path / 'home.png')
+                "image": ttk.PhotoImage(name="home", file=self.image_path + '/home.png')
             },
             {
                 "name": "options",
                 "zh_name": "设置",
                 "frame": SetFrame(self, self.pay_manager),
-                "image": ttk.PhotoImage(name="options", file=self.image_path / 'options.png')
+                "image": ttk.PhotoImage(name="options", file=self.image_path + '/options.png')
             }
         ]
 
