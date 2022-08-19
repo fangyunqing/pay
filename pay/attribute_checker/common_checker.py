@@ -50,10 +50,16 @@ class CommonChecker:
 
     @classmethod
     def check_excel_map(cls, key, val):
+        key = key.upper()
         if val in cls.excel_map.keys():
             return cls.excel_map[val]
         else:
             return str(cls.check_digit(key, val))
+
+    @classmethod
+    def get_excel_column(cls, val):
+        key_list = list(filter(lambda k: cls.excel_map.get(k) == str(val), cls.excel_map.keys()))
+        return key_list[0] if len(key_list) > 0 else None
 
     @classmethod
     def check_write_sheet(cls, key, val):

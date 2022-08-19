@@ -6,6 +6,7 @@
 __author__ = 'fyq'
 
 import functools
+import time
 
 from loguru import logger
 
@@ -19,7 +20,8 @@ class PayLog:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             logger.info("开始%s" % self.node)
+            begin_time = time.time()
             result = func(*args, **kwargs)
-            logger.info("结束%s" % self.node)
+            logger.info("结束{},用时{:.2f}秒".format(self.node, time.time() - begin_time))
             return result
         return wrapper

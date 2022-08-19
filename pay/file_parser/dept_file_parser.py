@@ -1,6 +1,6 @@
-# @Time    : 22/08/13 11:32
+# @Time    : 22/08/16 14:32
 # @Author  : fyq
-# @File    : supplier_file_parser.py
+# @File    : dept_file_parser.py
 # @Software: PyCharm
 
 __author__ = 'fyq'
@@ -10,10 +10,14 @@ import pay.constant as pc
 import pandas as pd
 
 
-class SupplierFileParser(AbstractDefaultFileParser):
+class DeptFileParser(AbstractDefaultFileParser):
 
     def support(self, pay_type):
-        return True
+        return pay_type in ("dept.pay", "dept.prepay")
+
+    def __init__(self):
+        super().__init__()
+        self._insert_name = False
 
     def _group_column(self, attribute_manager):
         return [attribute_manager.value(pc.supplier_column),
@@ -22,30 +26,11 @@ class SupplierFileParser(AbstractDefaultFileParser):
     def _do_parse_df_dict(self, df_dict, attribute_manager):
         type_column = attribute_manager.value(pc.type_column)
         supplier_column = attribute_manager.value(pc.supplier_column)
-        df_list = []
-        for key in df_dict.keys():
-            df = df_dict[key]
-            # dept type supplier 分组合计
-            df_group = df.groupby([self._name_column, type_column, supplier_column],
-                                  as_index=False).sum()
-            # 排序
-            df.sort_values(attribute_manager.value(pc.sort_column), ascending=False, inplace=True)
-            # 加入队列
-            df_list.append(df_group)
-        # 明细
-        df_detail_total = pd.concat(df_list)
-        df_top_detail_total = df_detail_total.drop([self._name_column, type_column, supplier_column],
-                                                   axis=1, errors="ignore").sum().to_frame().T
-        df_top_detail_total.insert(column=supplier_column, value="", loc=0)
-        df_top_detail_total.insert(column=type_column, value="", loc=0)
-        df_top_detail_total.insert(column=self._name_column, value="", loc=0)
-        # 去除dept列
-        df_total = df_detail_total.drop([self._name_column], axis=1, errors="ignore")
-        # 根据type和supplier分组合计
+        # 分类和供应商分组
+        df_total = pd.concat(df_dict.values()).groupby([type_column, supplier_column], as_index=False).sum()
         df_total_dict = {}
-        df_total_list = []
         df_top_total_list = []
-        df_total = df_total.groupby([type_column, supplier_column], as_index=False).sum()
+        df_total_list = []
         for type_name in df_total[type_column].unique():
             df_type = df_total[df_total[type_column] == type_name]
             # 根据type分组合计
@@ -69,10 +54,4 @@ class SupplierFileParser(AbstractDefaultFileParser):
             if type_name in df_total_dict.keys():
                 df_total_list.append(df_total_dict[type_name])
         df_total = pd.concat([df_top_total_total, df_top_total, pd.concat(df_total_list)])
-        return [df_total, pd.concat([df_top_detail_total, df_detail_total])]
-
-    def _write_sheet_list(self, attribute_manager):
-        write_sheet_list = \
-            super(SupplierFileParser, self)._write_sheet_list(attribute_manager=attribute_manager)
-        write_sheet_list.append(attribute_manager.value(pc.write_detail_sheet))
-        return write_sheet_list
+        return [df_total]

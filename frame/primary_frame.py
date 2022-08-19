@@ -41,6 +41,7 @@ class PrimaryFrame(ttk.Frame):
                  action=self.action,
                  bootstyle=ttk.INFO
                  ).pack(side=ttk.LEFT, fill=ttk.Y)
+        self.action("home")
 
     def action(self, frame_name):
         for button in self.buttons:

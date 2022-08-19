@@ -21,10 +21,10 @@ class GroupPay(InterfacePay):
 
     def __init__(self):
         super(GroupPay, self).__init__()
-        self._attribute_manager.insert(name=pc.sort_column,
-                                       attribute=Attribute(name=pc.dept,
-                                                           value="",
-                                                           text="部门",
-                                                           required=True,
-                                                           data_type="str"))
+        self._attribute_manager_dict["other"].insert(name=pc.sort_column,
+                                                     attribute=Attribute(name=pc.dept,
+                                                                         value="",
+                                                                         text="[模板]部门",
+                                                                         required=True,
+                                                                         data_type="str"))
         self._file_parser = GroupFileParser()

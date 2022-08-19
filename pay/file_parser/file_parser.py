@@ -22,3 +22,7 @@ class FileParser(metaclass=ABCMeta):
         :return:
         """
         pass
+
+    @abstractmethod
+    def support(self, pay_type):
+        pass

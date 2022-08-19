@@ -43,6 +43,8 @@ class LabelEditFrame(ttk.Frame):
             entry_type:
                 "int", "str"
                 默认 str
+            cb_state:
+                默认 "readonly
         """
 
         # 类型
@@ -63,6 +65,8 @@ class LabelEditFrame(ttk.Frame):
         self.cb_values = kwargs.pop("cb_values", [])
         # 文本框的类型
         self.entry_type = kwargs.pop("entry_type", "str")
+        # 组合框状态
+        self.cb_state = kwargs.pop("cb_state", "readonly")
         # 基类
         super().__init__(master, **kwargs)
         # 保存的值
@@ -93,7 +97,8 @@ class LabelEditFrame(ttk.Frame):
         elif self.edit_type == self.COMBOBOX:
             self.edit = ttk.Combobox(master=self,
                                      textvariable=self.value,
-                                     values=self.cb_values)
+                                     values=self.cb_values,
+                                     state=self.cb_state)
         else:
             self.edit = ttk.Entry(master=self, textvariable=self.value)
         self.edit.pack(side=ttk.LEFT, fill=ttk.X, expand=ttk.YES, padx=5, pady=5)

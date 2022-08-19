@@ -29,14 +29,15 @@ class AbstractFileParser(FileParser):
                     attribute_manager=attribute_manager)
         # 描述
         describe_excel_list = self._create_describe_4_excel(df_parse_list=df_parse_list,
-                                                            attribute_manager=attribute_manager,
-                                                            target_file=target_file)
+                                                            attribute_manager=attribute_manager)
         # 写入excel
         self._write_excel(describe_excel_list=describe_excel_list,
-                          attribute_manager=attribute_manager)
+                          attribute_manager=attribute_manager,
+                          target_file=target_file)
         # 渲染
         self._render_target(describe_excel_list=describe_excel_list,
-                            attribute_manager=attribute_manager)
+                            attribute_manager=attribute_manager,
+                            target_file=target_file)
 
     @abstractmethod
     def _parser_file_dict(self, file_dict, attribute_manager):
@@ -55,15 +56,15 @@ class AbstractFileParser(FileParser):
         pass
 
     @abstractmethod
-    def _create_describe_4_excel(self, df_parse_list, attribute_manager, target_file):
+    def _create_describe_4_excel(self, df_parse_list, attribute_manager):
         pass
 
     @abstractmethod
-    def _write_excel(self, describe_excel_list, attribute_manager):
+    def _write_excel(self, describe_excel_list, attribute_manager, target_file):
         pass
 
     @abstractmethod
-    def _render_target(self, describe_excel_list, attribute_manager):
+    def _render_target(self, describe_excel_list, attribute_manager, target_file):
         pass
 
 

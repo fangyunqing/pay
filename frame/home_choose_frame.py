@@ -17,11 +17,8 @@ class HomeChooseFrame(ttk.Frame):
         super().__init__(master, **kw)
         self.option_info = option_info
         self.target = self.option_info[1]
-        # 单选框
-        self.le_enable = LabelEditFrame(master=self,
-                                        edit_type=LabelEditFrame.CHECK_BUTTON,
-                                        label_text="生效")
-        self.le_enable.pack(side=ttk.TOP, fill=ttk.X, padx=5, pady=5)
+        # 生效
+        self.enable = ttk.IntVar(0)
         # 文件夹选择
         self.le_dir = LabelEditFrame(master=self,
                                      label_text="文件夹",
@@ -54,7 +51,7 @@ class HomeChooseFrame(ttk.Frame):
 
     def options(self):
         return self.option_info[0], {
-            "val": self.le_enable.value.get(),
+            "val": self.enable.get(),
             "parse_dir": self.le_dir.value.get(),
             "model_file": self.le_file.value.get(),
             "target": self.target,
@@ -62,7 +59,7 @@ class HomeChooseFrame(ttk.Frame):
         }
 
     def set_options(self, options):
-        self.le_enable.value.set(options.get("val", 0))
+        self.enable.set(options.get("val", 0))
         self.le_dir.value.set(options.get("parse_dir", "").replace("@@", ""))
         self.le_file.value.set(options.get("model_file", "").replace("@@", ""))
         self.target = options.get("target", self.option_info[1]).replace("@@", "")

@@ -8,6 +8,7 @@ __author__ = 'fyq'
 import ttkbootstrap as ttk
 from util.model_util import ModelUtil
 from frame.label_edit_frame import LabelEditFrame
+from ttkbootstrap.scrolled import ScrolledFrame
 
 
 class SetFrame(ttk.Frame):
@@ -19,7 +20,7 @@ class SetFrame(ttk.Frame):
         top_fr = ttk.Frame(self)
         top_fr.pack(side=ttk.TOP, fill=ttk.BOTH, expand=ttk.YES)
         self.notebook = ttk.Notebook(top_fr)
-        self.notebook.pack(side=ttk.RIGHT, fill=ttk.BOTH, expand=ttk.YES)
+        self.notebook.pack(side=ttk.RIGHT, fill=ttk.BOTH, expand=ttk.YES, padx=5, pady=5)
         bottom_fr = ttk.Frame(self)
         bottom_fr.pack(side=ttk.BOTTOM, fill=ttk.X)
         # pay
@@ -49,6 +50,7 @@ class SetFrame(ttk.Frame):
             self.mu = ModelUtil(f_pay.pay_name()[0])
             if len(self.mu.model_list) > 0:
                 self.cb_model["values"] = self.mu.model_list
+                self.cb_model.set("")
             else:
                 self.cb_model["values"] = []
                 self.cb_model.set("")
@@ -57,18 +59,18 @@ class SetFrame(ttk.Frame):
                 self.notebook.forget(tab)
                 self.option_data.clear()
             for pay_option in f_pay.pay_options():
-                tab_fr = ttk.Frame(self.notebook)
-                self.notebook.add(tab_fr, text=pay_option[1])
+                tab_fr = ScrolledFrame(self.notebook)
+                self.notebook.add(tab_fr.container, text=pay_option[1])
                 option_value = {}
                 self.option_data[pay_option[1]] = option_value
-                for attribute in f_pay.attribute_list:
+                for attribute in f_pay.attribute_list(pay_option[1]).attribute_list:
                     cf = LabelEditFrame(master=tab_fr,
                                         label_text=attribute.text,
                                         button_command="detail",
                                         entry_type=attribute.data_type,
                                         label_width=12,
                                         label_wrap_length=80)
-                    cf.pack(side=ttk.TOP, fill=ttk.X)
+                    cf.pack(side=ttk.TOP, fill=ttk.X, padx=10, pady=10)
                     option_value[attribute.name] = cf.value
 
     def model_select(self, event):

@@ -71,12 +71,58 @@ class DefaultAttributeChecker(IAttributeChecker):
             """
             attribute.value = CommonChecker.check_write_sheet(attribute.text, attribute.value)
 
+        def _check_write_detail_sheet(attribute):
+            """
+                写入的详情工作簿
+            :param attribute:
+            :return:
+            """
+            attribute.value = CommonChecker.check_write_sheet(attribute.text, attribute.value)
+
         def _check_check(attribute):
             """
                 校对
             :return:
             """
             attribute.value = CommonChecker.check_subtraction(attribute.text, attribute.value)
+
+        def _check_no_pay_reason(attribute):
+            """
+                未请款原因
+            :param attribute:
+            :return:
+            """
+            column_list = []
+            for column in attribute.value.split(","):
+                column_list.append(CommonChecker.check_excel_map(attribute.text, column))
+            attribute.value = ",".join(column_list)
+
+        def _check_pur_group(attribute):
+            """
+                采购组织
+            :param attribute:
+            :return:
+            """
+            attribute.value = CommonChecker.check_excel_map(attribute.text, attribute.value)
+
+        def _check_pur_no(attribute):
+            """
+                请购单号
+            :param attribute:
+            :return:
+            """
+            attribute.value = CommonChecker.check_excel_map(attribute.text, attribute.value)
+
+        def _check_pre_pay(attribute):
+            """
+                预付余额分析
+            :param attribute:
+            :return:
+            """
+            column_list = []
+            for column in attribute.value.split(","):
+                column_list.append(CommonChecker.check_excel_map(attribute.text, column))
+            attribute.value = ",".join(column_list)
 
         check_map = {
             pc.check: _check_check,
@@ -86,7 +132,12 @@ class DefaultAttributeChecker(IAttributeChecker):
             pc.skip_rows: _check_skip_rows,
             pc.use_column: _check_use_column,
             pc.read_sheet: _check_read_sheet,
-            pc.write_sheet: _check_write_sheet
+            pc.write_sheet: _check_write_sheet,
+            pc.write_detail_sheet: _check_write_detail_sheet,
+            pc.no_pay_reason: _check_no_pay_reason,
+            pc.pur_group: _check_pur_group,
+            pc.pur_no: _check_pur_no,
+            pc.pre_pay: _check_pre_pay
         }
 
         for attr in attribute_list:

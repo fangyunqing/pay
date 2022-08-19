@@ -13,7 +13,14 @@ import pandas as pd
 
 class GroupFileParser(AbstractDefaultFileParser):
 
-    def _parse_df_dict(self, df_dict, attribute_manager):
+    def support(self, pay_type):
+        return True
+
+    def __init__(self):
+        super().__init__()
+        self._first_merge = True
+
+    def _do_parse_df_dict(self, df_dict, attribute_manager):
         type_column = attribute_manager.value(pc.type_column)
         supplier_column = attribute_manager.value(pc.supplier_column)
         for key in df_dict.keys():

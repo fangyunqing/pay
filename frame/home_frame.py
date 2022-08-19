@@ -35,13 +35,6 @@ class HomeFrame(ttk.Frame):
         ttk.Button(master=title_fr,
                    text="开始",
                    command=self.start).pack(side=ttk.LEFT, padx=5, pady=5)
-        self.pb_parse = ttk.Progressbar(
-            master=title_fr,
-            maximum=100,
-            bootstyle=(ttk.SUCCESS, ttk.STRIPED))
-        self.pb_parse.pack(side=ttk.LEFT, fill=ttk.X, expand=ttk.YES, padx=5, pady=5)
-        self.pb_parse["value"] = 0
-
         # 选择项
         choose_fr = ttk.Frame(self)
         choose_fr.pack(side=ttk.TOP, fill=ttk.X)
@@ -51,11 +44,13 @@ class HomeFrame(ttk.Frame):
             tab_fr = HomeChooseFrame(master=self.nb_option, option_info=pay.pay_name())
             self.nb_option.add(tab_fr, text=pay.pay_name()[1])
             self.option_fr_list.append(tab_fr)
+            ttk.Checkbutton(master=title_fr, onvalue=1, offvalue=0, text=pay.pay_name()[1], variable=tab_fr.enable)\
+                .pack(side=ttk.LEFT, padx=5, pady=5)
 
         # 信息提示项
         message_fr = ttk.Frame(self)
         message_fr.pack(side=ttk.TOP, fill=ttk.BOTH, expand=ttk.YES)
-        self.tx_msg = ttk.Text(master=message_fr)
+        self.tx_msg = ttk.ScrolledText(master=message_fr)
         self.tx_msg.pack(side=ttk.TOP, fill=ttk.BOTH, expand=ttk.YES, padx=5, pady=5)
         loguru.logger.add(TextLogHandler(self.tx_msg), format="{time:YYYY-MM-DD HH:mm:ss:SSS} | {level} | {message}")
 
@@ -91,15 +86,9 @@ class HomeFrame(ttk.Frame):
         self.tx_msg.see(ttk.END)
         self.tx_msg.update()
 
-    def callback(self, msg):
-        self.pb_parse["value"] = self.pb_parse["value"] + 1
-        self.print_msg(msg)
-
     def thread_func(self, option_dict):
 
         try:
-            self.pb_parse['maximum'] = len(option_dict.keys()) * self.pay_manager.calls
-            self.pb_parse["value"] = 0
             self.tx_msg.delete(1.0, ttk.END)
             self.winfo_toplevel().attributes("-disabled", True)
             begin_time = time.time()
@@ -108,14 +97,11 @@ class HomeFrame(ttk.Frame):
                 self.pay_manager.parse(angle=key,
                                        model_name=options.get("model_name"),
                                        path=options.get("parse_dir"),
-                                       template_file=options.get("model_file"),
-                                       callback=self.callback,
-                                       target=options.get("target"))
+                                       template_file=options.get("model_file"))
             self.print_msg("总共用时：{:.2f}秒".format(time.time() - begin_time))
         except Exception as e:
             msg = str(e)
             self.winfo_toplevel().after(100, func=lambda: Messagebox.show_error(msg))
             loguru.logger.exception(msg)
         finally:
-            self.pb_parse["value"] = 0
             self.winfo_toplevel().attributes("-disabled", False)

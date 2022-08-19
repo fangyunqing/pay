@@ -7,6 +7,7 @@ __author__ = 'fyq'
 
 import pythoncom
 
+from pay.attribute_checker.common_checker import CommonChecker
 from pay.file_parser.abstract_file_parser import AbstractFileParser
 from loguru import logger
 import pay.constant as pc
@@ -52,8 +53,13 @@ class AbstractDefaultFileParser(AbstractFileParser):
 
         return df_dict
 
-    @abstractmethod
+    @PayLog(node="解析DataFrame")
     def _parse_df_dict(self, df_dict, attribute_manager):
+        return self._do_parse_df_dict(df_dict=df_dict,
+                                      attribute_manager=attribute_manager)
+
+    @abstractmethod
+    def _do_parse_df_dict(self, df_dict, attribute_manager):
         pass
 
     @PayLog(node="重建索引")
@@ -79,7 +85,7 @@ class AbstractDefaultFileParser(AbstractFileParser):
             df_parse[self._check_column] = df_parse[self._check_column].round(4)
 
     @PayLog(node="创建excel描述")
-    def _create_describe_4_excel(self, df_parse_list, attribute_manager, target_file):
+    def _create_describe_4_excel(self, df_parse_list, attribute_manager):
         write_sheet_list = self._write_sheet_list(attribute_manager)
         describe_excel_list = []
         for index, df_parse in enumerate(df_parse_list):
@@ -104,7 +110,6 @@ class AbstractDefaultFileParser(AbstractFileParser):
             describe_excel.column = len(df_parse.columns)
             describe_excel.sheet_name = write_sheet_info[0]
             describe_excel.start_row = int(write_sheet_info[1])
-            describe_excel.target_file = target_file
             describe_excel.total_row = total_row_list
             describe_excel.first_row_index = first_row_index
             describe_excel.detail = True if index > 0 else False
@@ -112,12 +117,17 @@ class AbstractDefaultFileParser(AbstractFileParser):
         return describe_excel_list
 
     @PayLog(node="写入excel")
-    def _write_excel(self, describe_excel_list, attribute_manager):
-        for describe_excel in describe_excel_list:
-            with pd.ExcelWriter(describe_excel.target_file,
-                                engine='openpyxl',
-                                mode='a',
-                                if_sheet_exists="overlay") as writer:
+    def _write_excel(self, describe_excel_list, attribute_manager, target_file):
+        target_sheet_list = list(pd.read_excel(io=target_file, sheet_name=None))
+        with pd.ExcelWriter(target_file,
+                            engine='openpyxl',
+                            mode='a',
+                            if_sheet_exists="overlay") as writer:
+            for describe_excel in describe_excel_list:
+                for ts in target_sheet_list:
+                    if describe_excel.sheet_name == ts.strip():
+                        describe_excel.sheet_name = ts
+                        break
                 describe_excel.df.to_excel(writer,
                                            startrow=describe_excel.start_row,
                                            sheet_name=describe_excel.sheet_name,
@@ -125,15 +135,18 @@ class AbstractDefaultFileParser(AbstractFileParser):
                                            index=None)
 
     @PayLog(node="渲染excel")
-    def _render_target(self, describe_excel_list, attribute_manager):
+    def _render_target(self, describe_excel_list, attribute_manager, target_file):
         pythoncom.CoInitialize()
         app = xl.App(visible=False, add_book=False)
         try:
             app.display_alerts = False
-            for describe_excel in describe_excel_list:
-                wb = app.books.open(describe_excel.target_file)
+            for desc_index, describe_excel in enumerate(describe_excel_list):
+                wb = app.books.open(target_file)
                 try:
+                    check = attribute_manager.value(pc.check)
+                    has_check = check and len(check) > 0
                     sheet = wb.sheets[describe_excel.sheet_name]
+                    sheet.select()
                     row_begin = describe_excel.start_row + 1
                     row_end = describe_excel.start_row + describe_excel.row
                     column_begin = 1
@@ -179,6 +192,27 @@ class AbstractDefaultFileParser(AbstractFileParser):
                             merge_rng.api.HorizontalAlignment = -4108
                             merge_rng.api.VerticalAlignment = -4108
                             r = e
+
+                    # 打印设置
+                    if desc_index == 0:
+                        sheet.api.PageSetup.LeftHeader = '&"微软雅黑,常规"&12编号:&A'
+                        sheet.api.PageSetup.RightHeader = '&"微软雅黑,常规"&12打印日期：&D'
+                        sheet.api.PageSetup.CenterFooter = '&"微软雅黑,常规"&12第 &P 页，共 &N 页'
+                        sheet.api.PageSetup.PrintArea = \
+                            "$A$1:$" + \
+                            CommonChecker.get_excel_column(column_end - 2 if has_check else column_end - 1) + \
+                            str(row_end)
+                        sheet.api.PageSetup.PaperSize = 8
+                        sheet.api.PageSetup.Orientation = 2
+                        sheet.api.PageSetup.TopMargin = 1.5 * 28.35
+                        sheet.api.PageSetup.BottomMargin = 1 * 28.35
+                        sheet.api.PageSetup.LeftMargin = 0.5 * 28.35
+                        sheet.api.PageSetup.RightMargin = 0.5 * 28.35
+                        sheet.api.PageSetup.HeaderMargin = 0.8 * 28.35
+                        sheet.api.PageSetup.FooterMargin = 0.5 * 28.35
+                        sheet.api.PageSetup.CenterHorizontally = True
+                        sheet.api.PageSetup.PrintTitleRows = "$1:$6"
+                        app.api.ActiveWindow.View = 2
                 finally:
                     wb.save()
                     wb.close()
@@ -215,6 +249,10 @@ class AbstractDefaultFileParser(AbstractFileParser):
         # 去除无用的列
         if len(useless_column) > 0:
             df.drop(useless_column, axis=1, inplace=True, errors="ignore")
+        # 替换0为NAN
+        df.replace(0, np.nan, inplace=True)
+        # 去除全部NAN行
+        df.dropna(axis=0, how="all", inplace=True)
         # 聚合数据清理
         self._handle_group_column(df=df, attribute_manager=attribute_manager)
         # 非聚合数据清理
@@ -227,16 +265,17 @@ class AbstractDefaultFileParser(AbstractFileParser):
 
     def _handle_group_column(self, df, attribute_manager):
         for group_column in self._group_column(attribute_manager):
-            df.drop(df[df[group_column].isin(["小计", "合计", "", np.nan]) | (df[group_column].str.contains("汇总"))].index,
-                    inplace=True)
+            df[group_column].fillna("", inplace=True)
             df[group_column] = df[group_column].astype(str)
             df[group_column].str.strip()
+            df.drop(df[df[group_column].isin(["小计", "合计"]) | (df[group_column].str.contains("汇总"))].index,
+                    inplace=True)
 
     def _handler_data_column(self, df, attribute_manager):
         try:
-            df.fillna(0, inplace=True)
             for column in df.columns:
                 if str(column) not in self._group_column(attribute_manager=attribute_manager):
+                    df[column].fillna(0, inplace=True)
                     df[column] = df[column].astype("float64")
         except Exception:
             raise Exception("转换类型为浮点型失败,请检查解析文件是否存在非数字类型或者读取了标题行")
@@ -249,4 +288,3 @@ class AbstractDefaultFileParser(AbstractFileParser):
         :return: list
         """
         pass
-

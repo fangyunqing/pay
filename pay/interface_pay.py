@@ -34,7 +34,7 @@ class InterfacePay(metaclass=ABCMeta):
 
     def __init__(self):
         # 属性管理
-        self._attribute_manager = AttributeManager()
+        self._attribute_manager_dict = {"other": AttributeManager()}
         # 创建属性
         self._create_attribute_list()
         # 检查器
@@ -47,80 +47,85 @@ class InterfacePay(metaclass=ABCMeta):
         self._file_parser = None
 
     def _create_attribute_list(self):
-        self._attribute_manager.add(Attribute(name="read_sheet",
-                                              value="",
-                                              text="[解析]读取的工作簿名称",
-                                              data_type="str",
-                                              required=True))
-        self._attribute_manager.add(Attribute(name="skip_rows",
-                                              value="",
-                                              text="[解析]跳过的行数",
-                                              data_type="int",
-                                              required=True))
-        self._attribute_manager.add(Attribute(name="use_column",
-                                              value="",
-                                              text="[解析]需要的列(从0开始,逗号分隔)",
-                                              data_type="str",
-                                              required=True))
-        self._attribute_manager.add(Attribute(name="use_column",
-                                              value="",
-                                              text="[解析]需要的列(从0开始,逗号分隔)",
-                                              data_type="str",
-                                              required=True))
-        self._attribute_manager.add(Attribute(name="sort_column",
-                                              value="",
-                                              text="[解析]排序列",
-                                              data_type="str",
-                                              required=True))
-        self._attribute_manager.add(Attribute(name="supplier_column",
-                                              value="",
-                                              text="[解析]供应商列号",
-                                              data_type="str",
-                                              required=True))
-        self._attribute_manager.add(Attribute(name="type_column",
-                                              value="",
-                                              text="[解析]供应商类型列号",
-                                              data_type="str",
-                                              required=True))
-        self._attribute_manager.add(Attribute(name="write_sheet",
-                                              value="",
-                                              text="[模板]写入的工作簿名称",
-                                              data_type="str",
-                                              required=True))
-        self._attribute_manager.add(Attribute(name="check",
-                                              value="",
-                                              text="[模板]校对",
-                                              data_type="str",
-                                              required=False))
+        am = self._attribute_manager_dict["other"]
+        am.add(Attribute(name="read_sheet",
+                         value="",
+                         text="[解析]读取的工作簿名称",
+                         data_type="str",
+                         required=True))
+        am.add(Attribute(name="skip_rows",
+                         value="",
+                         text="[解析]跳过的行数",
+                         data_type="int",
+                         required=True))
+        am.add(Attribute(name="use_column",
+                         value="",
+                         text="[解析]需要的列(从0开始,逗号分隔)",
+                         data_type="str",
+                         required=True))
+        am.add(Attribute(name="use_column",
+                         value="",
+                         text="[解析]需要的列(从0开始,逗号分隔)",
+                         data_type="str",
+                         required=True))
+        am.add(Attribute(name="sort_column",
+                         value="",
+                         text="[解析]排序列",
+                         data_type="str",
+                         required=True))
+        am.add(Attribute(name="supplier_column",
+                         value="",
+                         text="[解析]供应商列号",
+                         data_type="str",
+                         required=True))
+        am.add(Attribute(name="type_column",
+                         value="",
+                         text="[解析]供应商类型列号",
+                         data_type="str",
+                         required=True))
+        am.add(Attribute(name="write_sheet",
+                         value="",
+                         text="[模板]写入的工作簿名称",
+                         data_type="str",
+                         required=True))
+        am.add(Attribute(name="check",
+                         value="",
+                         text="[模板]校对",
+                         data_type="str",
+                         required=False))
 
-    def parse(self, attribute_data, path, template_file, target=None):
+    def parse(self, attribute_data, path, template_file):
 
         logger.info("开始处理模块[%s]" % self.pay_name()[1])
         # 解析路径
-        prefix_date, file_dict = self._path_parser.parse_path(path=path, date_length=6)
+        prefix_date, file_dict, target = self._path_parser.parse_path(path=path, date_length=6)
         # 拷贝模板文件
         target_file = self._file_copy.copy_file(template_file=template_file,
                                                 path=path,
                                                 target=target,
                                                 prefix_date=prefix_date)
+
         for attribute_name in attribute_data.keys():
             try:
                 logger.info("开始处理节点[%s]" % attribute_name)
                 # 设置属性
-                self._set_attribute(attribute_data[attribute_name])
+                self._set_attribute(attribute_data[attribute_name], attribute_name)
                 # 检查属性
-                self._check_attribute()
+                self._check_attribute(attribute_name)
+                # 原始属性
+                am = self.attribute_list(attribute_name)
                 # 解析文件
                 if isinstance(self._file_parser, FileParser):
                     self._file_parser.parse_file(file_dict=file_dict,
                                                  target_file=target_file,
-                                                 attribute_manager=self._attribute_manager)
+                                                 attribute_manager=am)
                 elif isinstance(self._file_parser, list):
+                    pay_type = self.pay_name()[0] + "." + self.map_pay_option(attribute_name)
                     for fp in self._file_parser:
-                        if isinstance(fp, FileParser):
+                        if isinstance(fp, FileParser) and fp.support(pay_type):
                             fp.parse_file(file_dict=file_dict,
                                           target_file=target_file,
-                                          attribute_manager=self._attribute_manager)
+                                          attribute_manager=am)
             except Exception as e:
                 raise Exception("处理节点[%s]失败:[%s]" % (attribute_name, str(e)))
 
@@ -128,25 +133,35 @@ class InterfacePay(metaclass=ABCMeta):
 
         logger.info("结束处理模块[%s]" % self.pay_name()[1])
 
-    def _set_attribute(self, attribute_dict):
+    def _set_attribute(self, attribute_dict, pay_option):
         """
             设置属性
         :param attribute_dict: 属性字典
         :return:
         """
-        for attribute in self._attribute_manager.attribute_list:
+        am = self.attribute_list(pay_option)
+        for attribute in am.attribute_list:
             if attribute.name in attribute_dict:
                 attribute.value = attribute_dict[attribute.name]
             else:
                 attribute.value = ""
 
-    def _check_attribute(self):
+    def _check_attribute(self, pay_option):
+        am = self.attribute_list(pay_option)
         for _attribute_checker in self._attribute_checker_list:
-            _attribute_checker.check_attribute(self._attribute_manager.attribute_list)
+            _attribute_checker.check_attribute(am.attribute_list)
 
-    @property
-    def attribute_list(self):
-        return self._attribute_manager.attribute_list
+    def attribute_list(self, pay_option):
+        map_p_o = self.map_pay_option(pay_option)
+        for key in self._attribute_manager_dict.keys():
+            if map_p_o in key.split(","):
+                return self._attribute_manager_dict[key]
+        return self._attribute_manager_dict["other"]
+
+    def map_pay_option(self, pay_option):
+        for po in self.pay_options():
+            if po[1] == pay_option:
+                return po[0]
 
     @abstractmethod
     def pay_name(self):
@@ -155,4 +170,3 @@ class InterfacePay(metaclass=ABCMeta):
     @abstractmethod
     def pay_options(self):
         pass
-

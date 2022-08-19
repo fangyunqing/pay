@@ -8,13 +8,14 @@ __author__ = 'fyq'
 import os
 from loguru import logger
 from pay.path_parser.path_parser import PathParser
+from pay.decorator.pay_log import PayLog
 
 
 class DefaultPathParser(PathParser):
     """
     默认路径解析器, 只会解析1级和2级路径
     """
-
+    @PayLog(node="解析路径")
     def parse_path(self, path, date_length):
         """
             1. 解析路径形成 file_dict
@@ -23,8 +24,6 @@ class DefaultPathParser(PathParser):
         :param path: 需要解析的路径
         :return:
         """
-        logger.info("开始解析路径[%s]" % path)
-
         file_dict = {}
         prefix_list = []
 
@@ -64,6 +63,6 @@ class DefaultPathParser(PathParser):
         if prefix_date is None:
             logger.exception("从文件标题没有发现可用的时间")
 
-        return prefix_date, file_dict
+        return prefix_date, file_dict, None
 
 

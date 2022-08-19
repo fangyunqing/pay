@@ -23,9 +23,9 @@ def thread_error(event):
 
 app = ttk.Window("Pay", "yeti")
 PrimaryFrame(app)
-app.geometry("750x600")
+app.state("zoomed")
 app.position_center()
 app.iconbitmap(default='assets/small.ico')
 app.report_callback_exception = print_exception
-app.bind("<<Thread_ERROR>>", thread_error)
+app.title("财务工具")
 app.mainloop()

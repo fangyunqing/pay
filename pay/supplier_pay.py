@@ -5,7 +5,6 @@
 
 __author__ = 'fyq'
 
-
 from pay.interface_pay import InterfacePay
 import pay.constant as pc
 from pay.attribute.attribute import Attribute
@@ -22,10 +21,10 @@ class SupplierPay(InterfacePay):
 
     def __init__(self):
         super().__init__()
-        self._attribute_manager.insert(name=pc.write_sheet,
-                                         attribute=Attribute(name=pc.write_detail_sheet,
-                                                             value="",
-                                                             text="[解析]写入的详情工作簿名称",
-                                                             required=True,
-                                                             data_type="str"))
+        self._attribute_manager_dict["other"].insert(name=pc.write_sheet,
+                                                     attribute=Attribute(name=pc.write_detail_sheet,
+                                                                         value="",
+                                                                         text="[解析]写入的详情工作簿名称",
+                                                                         required=True,
+                                                                         data_type="str"))
         self._file_parser = SupplierFileParser()
