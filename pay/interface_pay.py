@@ -9,6 +9,7 @@ from abc import ABCMeta, abstractmethod
 
 from pay.attribute_checker.default_attribute_checker import DefaultAttributeChecker
 from pay.attribute.attribute import Attribute
+from pay.decorator.pay_log import PayLog
 from pay.path_parser import DefaultPathParser
 from pay.file_copy import DefaultFileCopy
 from pay.attribute.attribute_manager import AttributeManager
@@ -146,6 +147,7 @@ class InterfacePay(metaclass=ABCMeta):
             else:
                 attribute.value = ""
 
+    @PayLog(node="属性检查")
     def _check_attribute(self, pay_option):
         am = self.attribute_list(pay_option)
         for _attribute_checker in self._attribute_checker_list:

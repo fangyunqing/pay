@@ -14,6 +14,7 @@ class LabelEditFrame(ttk.Frame):
     ENTRY = "entry"
     CHECK_BUTTON = "check_button"
     COMBOBOX = "combobox"
+    DATE_ENTRY = "date_entry"
 
     def __init__(self, master, **kwargs):
 
@@ -45,6 +46,8 @@ class LabelEditFrame(ttk.Frame):
                 默认 str
             cb_state:
                 默认 "readonly
+            edit_fill:
+                默认: true
         """
 
         # 类型
@@ -67,8 +70,13 @@ class LabelEditFrame(ttk.Frame):
         self.entry_type = kwargs.pop("entry_type", "str")
         # 组合框状态
         self.cb_state = kwargs.pop("cb_state", "readonly")
+        # 编辑框是否铺满
+        self.edit_fill = kwargs.pop("edit_fill", True)
         # 基类
         super().__init__(master, **kwargs)
+        # 时间类型
+        if self.entry_type == "date":
+            self.edit_type = self.DATE_ENTRY
         # 保存的值
         if self.edit_type in [self.ENTRY, self.COMBOBOX]:
             if self.edit_type == self.ENTRY:
@@ -80,6 +88,8 @@ class LabelEditFrame(ttk.Frame):
                 self.value = ttk.StringVar(value="")
         elif self.edit_type in [self.CHECK_BUTTON]:
             self.value = ttk.IntVar()
+        elif self.edit_type in [self.DATE_ENTRY]:
+            self.value = ttk.StringVar(value="")
         else:
             self.value = ttk.StringVar(value="")
         # 标签
@@ -99,9 +109,19 @@ class LabelEditFrame(ttk.Frame):
                                      textvariable=self.value,
                                      values=self.cb_values,
                                      state=self.cb_state)
+        elif self.edit_type == self.DATE_ENTRY:
+            self.edit = ttk.DateEntry(master=self,
+                                      dateformat="%Y-%m-%d",
+                                      width=20)
+            self.value.set(self.edit.entry.get())
+            self.edit.entry["textvariable"] = self.value
+            self.edit_fill = False
         else:
             self.edit = ttk.Entry(master=self, textvariable=self.value)
-        self.edit.pack(side=ttk.LEFT, fill=ttk.X, expand=ttk.YES, padx=5, pady=5)
+        if self.edit_fill:
+            self.edit.pack(side=ttk.LEFT, fill=ttk.X, expand=ttk.YES, padx=5, pady=5)
+        else:
+            self.edit.pack(side=ttk.LEFT, padx=5, pady=5)
         # 按钮
         if self.button_command:
             self.bt_detail = ttk.Button(
@@ -109,7 +129,7 @@ class LabelEditFrame(ttk.Frame):
                 text=self.button_text,
                 width=5,
                 command=self._bt_detail_click)
-            self.bt_detail.pack(side=ttk.RIGHT, padx=5, pady=5)
+            self.bt_detail.pack(side=ttk.LEFT, padx=5, pady=5)
         # 详情窗口
         self.detail_fr = None
         self.tx_detail = None
@@ -137,6 +157,7 @@ class LabelEditFrame(ttk.Frame):
         box = DetailMessageBox(title="文件", value=self.value.get())
         box.show()
         if box.result:
+            box.result.replace("\n", "")
             self.value.set(box.result)
 
     def command_file(self):

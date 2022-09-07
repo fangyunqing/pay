@@ -21,10 +21,9 @@ class DeptPay(InterfacePay):
     def pay_name(self):
         return "dept", "事业部"
 
-    def pay_options(self):
+    def pay_options(selfno_pay_detail):
         return ("pay", "应付汇总"), ("prepay", "预付汇总"), \
-               ("pay_detail", "应付-采购明细表"), ("pre_pay_detail", "预付-采购明细表"), \
-               ("no_pay_detail", "应付-未请款明细说明")
+               ("pay_detail", "应付-采购明细表"), ("pre_pay_detail", "预付-采购明细表")
 
     def __init__(self):
         super().__init__()

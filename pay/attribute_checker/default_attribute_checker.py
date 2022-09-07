@@ -8,7 +8,6 @@ __author__ = 'fyq'
 from pay.attribute_checker.common_checker import CommonChecker
 import pay.constant as pc
 from pay.attribute_checker.attribute_checker import IAttributeChecker
-from pay.decorator.pay_log import PayLog
 
 
 class DefaultAttributeChecker(IAttributeChecker):
@@ -16,9 +15,7 @@ class DefaultAttributeChecker(IAttributeChecker):
         默认的属性检查器
     """
 
-    @PayLog(node="属性检查")
-    def check_attribute(self, attribute_list):
-
+    def create_check_map(self):
         def _check_read_sheet(attribute):
             """
                 读取的工作簿
@@ -124,7 +121,7 @@ class DefaultAttributeChecker(IAttributeChecker):
                 column_list.append(CommonChecker.check_excel_map(attribute.text, column))
             attribute.value = ",".join(column_list)
 
-        check_map = {
+        return {
             pc.check: _check_check,
             pc.sort_column: _check_sort_column,
             pc.supplier_column: _check_supplier_column,
@@ -139,10 +136,4 @@ class DefaultAttributeChecker(IAttributeChecker):
             pc.pur_no: _check_pur_no,
             pc.pre_pay: _check_pre_pay
         }
-
-        for attr in attribute_list:
-            CommonChecker.check_strip_len(attr.name, attr.value, attr.required)
-            if attr.name in check_map:
-                check_map[attr.name](attr)
-
 

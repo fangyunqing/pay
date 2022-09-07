@@ -26,13 +26,13 @@ class HomeChooseFrame(ttk.Frame):
         self.le_dir.pack(side=ttk.TOP, fill=ttk.X, padx=5, pady=5)
         # 模板文件选择
         self.le_file = LabelEditFrame(master=self,
-                                      label_text="模板文件",
+                                      label_text="模板",
                                       button_command="file")
         self.le_file.pack(side=ttk.TOP, fill=ttk.X, padx=5, pady=5)
         # 设置参数
         self.le_option = LabelEditFrame(master=self,
                                         edit_type=LabelEditFrame.COMBOBOX,
-                                        label_text="设置参数",
+                                        label_text="参数",
                                         button_text="刷新",
                                         cb_values=ModelUtil(self.option_info[0]).model_list,
                                         button_command=self.option_refresh)

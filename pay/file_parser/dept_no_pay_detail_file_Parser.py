@@ -32,6 +32,7 @@ class DeptNoPayDetailFileParser(AbstractDefaultFileParser):
                                          axis=1,
                                          errors="ignore").groupby([type_column],
                                                                   as_index=False).sum()
+        df_little_total.sort_values(attribute_manager.value(pc.sort_column), ascending=False, inplace=True)
         for gc in no_pay_reason_column:
             df_little_total[str(gc)] = ""
         df_little_total.insert(column=supplier_column, value="小计", loc=1)
@@ -40,7 +41,7 @@ class DeptNoPayDetailFileParser(AbstractDefaultFileParser):
         df_total = df_detail.sum(numeric_only=True).to_frame().T
         for gc in no_pay_reason_column:
             df_total[str(gc)] = ""
-        df_total.insert(column=supplier_column, value="小计", loc=0)
+        df_total.insert(column=supplier_column, value="合计", loc=0)
         df_total.insert(column=pur_group_column, value="", loc=0)
         df_total.insert(column=type_column, value="", loc=0)
         return [pd.concat([df_total, df_little_total, df_detail])]

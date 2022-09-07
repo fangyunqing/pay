@@ -76,3 +76,6 @@ class AttributeManager:
         if len(value_list) > 0:
             return value_list[0]
 
+    def clear(self):
+        self.attribute_list = []
+

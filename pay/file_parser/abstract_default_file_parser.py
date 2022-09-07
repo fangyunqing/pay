@@ -47,7 +47,8 @@ class AbstractDefaultFileParser(AbstractFileParser):
                 except Exception as e:
                     raise Exception("解析文件[%s]失败:[%s]" % (file, str(e)))
                 # 加入到队列中
-                df_file.append(df)
+                if df is not None:
+                    df_file.append(df)
             if len(df_file) > 0:
                 df_dict[key] = pd.concat(df_file)
 
@@ -98,8 +99,8 @@ class AbstractDefaultFileParser(AbstractFileParser):
                         break
             # 第一列
             first_row_index = []
-            vc = df_parse['0'].value_counts()
-            for v in df_parse['0'].unique():
+            vc = df_parse.iloc[0].value_counts()
+            for v in df_parse.iloc[0].unique():
                 first_row_index.append(vc[v])
 
             write_sheet = write_sheet_list[index]
@@ -110,6 +111,7 @@ class AbstractDefaultFileParser(AbstractFileParser):
             describe_excel.column = len(df_parse.columns)
             describe_excel.sheet_name = write_sheet_info[0]
             describe_excel.start_row = int(write_sheet_info[1])
+            describe_excel.start_column = int(write_sheet_info[2])
             describe_excel.total_row = total_row_list
             describe_excel.first_row_index = first_row_index
             describe_excel.detail = True if index > 0 else False
@@ -130,6 +132,7 @@ class AbstractDefaultFileParser(AbstractFileParser):
                         break
                 describe_excel.df.to_excel(writer,
                                            startrow=describe_excel.start_row,
+                                           startcol=describe_excel.start_column,
                                            sheet_name=describe_excel.sheet_name,
                                            header=None,
                                            index=None)
@@ -149,8 +152,8 @@ class AbstractDefaultFileParser(AbstractFileParser):
                     sheet.select()
                     row_begin = describe_excel.start_row + 1
                     row_end = describe_excel.start_row + describe_excel.row
-                    column_begin = 1
-                    column_end = describe_excel.column
+                    column_begin = describe_excel.start_column + 1
+                    column_end = describe_excel.start_column + describe_excel.column
                     rng = sheet.range((row_begin, column_begin), (row_end, column_end))
                     # 隐藏0 保留小数位0
                     rng.number_format = '[=0]"";###,###'
@@ -170,7 +173,7 @@ class AbstractDefaultFileParser(AbstractFileParser):
                     rng.font.name = "微软雅黑"
                     # 有合计行 加粗 改背景颜色
                     for row in describe_excel.total_row:
-                        total_rng = sheet.range((row_begin + row, 1), (row_begin + row, column_end))
+                        total_rng = sheet.range((row_begin + row, column_begin), (row_begin + row, column_end))
                         total_rng.color = 217, 217, 217
                         total_rng.font.bold = True
                     # 有合计列 改背景颜色
@@ -198,10 +201,6 @@ class AbstractDefaultFileParser(AbstractFileParser):
                         sheet.api.PageSetup.LeftHeader = '&"微软雅黑,常规"&12编号:&A'
                         sheet.api.PageSetup.RightHeader = '&"微软雅黑,常规"&12打印日期：&D'
                         sheet.api.PageSetup.CenterFooter = '&"微软雅黑,常规"&12第 &P 页，共 &N 页'
-                        sheet.api.PageSetup.PrintArea = \
-                            "$A$1:$" + \
-                            CommonChecker.get_excel_column(column_end - 2 if has_check else column_end - 1) + \
-                            str(row_end)
                         sheet.api.PageSetup.PaperSize = 8
                         sheet.api.PageSetup.Orientation = 2
                         sheet.api.PageSetup.TopMargin = 1.5 * 28.35
@@ -212,6 +211,11 @@ class AbstractDefaultFileParser(AbstractFileParser):
                         sheet.api.PageSetup.FooterMargin = 0.5 * 28.35
                         sheet.api.PageSetup.CenterHorizontally = True
                         sheet.api.PageSetup.PrintTitleRows = "$1:$6"
+                        sheet.api.PageSetup.Zoom = 100
+                        sheet.api.PageSetup.PrintArea = \
+                            "$" + CommonChecker.get_excel_column(describe_excel.start_column) + "$1" + ":$" + \
+                            CommonChecker.get_excel_column(column_end - 2 if has_check else column_end - 1) + \
+                            str(row_end)
                         app.api.ActiveWindow.View = 2
                 finally:
                     wb.save()
@@ -230,7 +234,8 @@ class AbstractDefaultFileParser(AbstractFileParser):
         df_read_dict = pd.read_excel(io=file,
                                      sheet_name=None,
                                      skiprows=attribute_manager.value(pc.skip_rows),
-                                     header=None)
+                                     header=None,
+                                     dtype=str)
         for sheet_name in df_read_dict.keys():
             if sheet_name.strip() == read_sheet or sheet_name.strip() == read_sheet + "-" + key:
                 df = df_read_dict[sheet_name]
@@ -268,16 +273,17 @@ class AbstractDefaultFileParser(AbstractFileParser):
             df[group_column].fillna("", inplace=True)
             df[group_column] = df[group_column].astype(str)
             df[group_column].str.strip()
-            df.drop(df[df[group_column].isin(["小计", "合计"]) | (df[group_column].str.contains("汇总"))].index,
+            df.drop(df[df[group_column].isin(["小计", "合计", "总计"]) | (df[group_column].str.contains("汇总"))].index,
                     inplace=True)
 
     def _handler_data_column(self, df, attribute_manager):
         try:
             for column in df.columns:
                 if str(column) not in self._group_column(attribute_manager=attribute_manager):
+                    df[column] = df[column].apply(lambda x: "0" if str(x).isspace() else x)
                     df[column].fillna(0, inplace=True)
                     df[column] = df[column].astype("float64")
-        except Exception:
+        except Exception as e:
             raise Exception("转换类型为浮点型失败,请检查解析文件是否存在非数字类型或者读取了标题行")
 
     @abstractmethod

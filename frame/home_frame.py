@@ -11,7 +11,6 @@ import time
 import ttkbootstrap as ttk
 from frame.home_choose_frame import HomeChooseFrame
 from util.model_util import ModelUtil
-import traceback
 from pay.log_handler.text_log_handler import TextLogHandler
 from ttkbootstrap.dialogs.dialogs import Messagebox
 import loguru
@@ -72,8 +71,16 @@ class HomeFrame(ttk.Frame):
         option_dict = {}
         for tab in self.option_fr_list:
             option, options = tab.options()
-            if options.get("val") == 1 and len(options.get("parse_dir")) > 0 and len(
-                    options.get("model_file")) > 0 and len(options.get("model_name")) > 0:
+            if options.get("val") == 1:
+                if len(options.get("parse_dir")) <= 0:
+                    Messagebox.show_error(message="请选择[{}]的文件夹".format(tab.option_info[1]))
+                    return
+                if len(options.get("model_file")) <= 0:
+                    Messagebox.show_error(message="请选择[{}]的模板".format(tab.option_info[1]))
+                    return
+                if len(options.get("model_name")) <= 0:
+                    Messagebox.show_error(message="请选择[{}]的参数".format(tab.option_info[1]))
+                    return
                 option_dict[option] = options
         if len(option_dict.keys()) > 0:
             t = threading.Thread(target=self.thread_func, args=(option_dict,))
