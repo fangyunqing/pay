@@ -70,7 +70,7 @@ class ARDayFileParser(AbstractDefaultFileParser):
         df_ar_day_data[currency_column] = df_ar_day_data[currency_column]. \
             apply(lambda val: "人民币" if val.strip() == "RMB" else "美元")
         df_ar_day_data[ar_money_column] = df_ar_day_data[ar_money_column]. \
-            apply(lambda val: Decimal(val) / 10000)
+            apply(lambda x: float(x) / 10000)
         return [df_ar_day_data]
 
     def _group_column(self, attribute_manager):
@@ -180,9 +180,9 @@ class ARDayFileParser(AbstractDefaultFileParser):
                     ar_begin_date_list = str(attribute_manager.value(pc.ar_begin_date)).split("-")[:2]
                     days = calendar.monthrange(int(ar_begin_date_list[0]), int(ar_begin_date_list[1]))[1]
                     day_end = int(target_begin_date_column) + days - 1
-                    df[r_column] = df[r_column].apply(Decimal)
-                    df[r_i_column] = df[r_i_column].apply(Decimal)
-                    df[n_r_column] = df[n_r_column].apply(Decimal)
+                    df[r_column] = df[r_column].astype(float)
+                    df[r_i_column] = df[r_i_column].astype(float)
+                    df[n_r_column] = df[n_r_column].astype(float)
 
                     day_list = []
                     for date in describe_excel.df[pay_date_column].unique():
@@ -190,7 +190,7 @@ class ARDayFileParser(AbstractDefaultFileParser):
                     for c in range(int(target_begin_date_column), day_end + 1):
                         if c in day_list:
                             df[str(c)] = 0
-                        df[str(c)] = df[str(c)].apply(Decimal)
+                        df[str(c)] = df[str(c)].astype(float)
 
                     df_insert_list = []
                     for row_index, row in describe_excel.df.iterrows():
@@ -206,40 +206,60 @@ class ARDayFileParser(AbstractDefaultFileParser):
                                         break
                                     tract_list = []
                                     if t_r[n_r_column] <= 0:
-                                        df.loc[t_index, location_day] = t_r[location_day] + ar_money
-                                        t_r[location_day] = t_r[location_day] + ar_money
+                                        df.loc[t_index, location_day] = \
+                                            df_bill_code.loc[t_index, location_day] + ar_money
+                                        df_bill_code.loc[t_index, location_day] = \
+                                            df_bill_code.loc[t_index, location_day] + ar_money
                                         ar_money = 0
                                         tract_list.append(t_r[location_day])
                                         tract_list.append(str(ar_money) + "(全部金额)")
                                     elif ar_money > t_r[n_r_column]:
-                                        df.loc[t_index, location_day] = t_r[location_day] + t_r[n_r_column]
-                                        t_r[location_day] = t_r[location_day] + t_r[n_r_column]
-                                        df.loc[t_index, r_i_column] = t_r[r_i_column] + t_r[n_r_column]
-                                        t_r[r_i_column] = t_r[r_i_column] + t_r[n_r_column]
+                                        df.loc[t_index, location_day] = \
+                                            df_bill_code.loc[t_index, location_day]\
+                                            + df_bill_code.loc[t_index, n_r_column]
+                                        df_bill_code.loc[t_index, location_day] = \
+                                            df_bill_code.loc[t_index, location_day] + t_r[n_r_column]
+                                        df.loc[t_index, r_i_column] = \
+                                            df_bill_code.loc[t_index, r_i_column] \
+                                            + df_bill_code.loc[t_index, n_r_column]
+                                        df_bill_code.loc[t_index, r_i_column] =  \
+                                            df_bill_code.loc[t_index, r_i_column] \
+                                            + df_bill_code.loc[t_index, n_r_column]
                                         df.loc[t_index, n_r_column] = 0
-                                        ar_money = ar_money - t_r[n_r_column]
-                                        t_r[n_r_column] = 0
+                                        ar_money = ar_money - df_bill_code.loc[t_index, n_r_column]
+                                        df_bill_code.loc[t_index, n_r_column] = 0
                                         tract_list.append(t_r[location_day])
                                         tract_list.append(str(t_r[n_r_column]) + "(未收)")
                                     else:
-                                        df.loc[t_index, location_day] = t_r[location_day] + ar_money
-                                        t_r[location_day] = t_r[location_day] + ar_money
-                                        df.loc[t_index, r_i_column] = t_r[r_i_column] + ar_money
-                                        t_r[r_i_column] = t_r[r_i_column] + ar_money
-                                        df.loc[t_index, n_r_column] = t_r[n_r_column] - ar_money
-                                        t_r[n_r_column] = t_r[n_r_column] - ar_money
+                                        df.loc[t_index, location_day] = \
+                                            df_bill_code.loc[t_index, location_day] + ar_money
+                                        df_bill_code.loc[t_index, location_day] = \
+                                            df_bill_code.loc[t_index, location_day] + ar_money
+                                        df.loc[t_index, r_i_column] = df_bill_code.loc[t_index, r_i_column] + ar_money
+                                        df_bill_code.loc[t_index, r_i_column] = \
+                                            df_bill_code.loc[t_index, r_i_column] + ar_money
+                                        df.loc[t_index, n_r_column] = \
+                                            df_bill_code.loc[t_index, n_r_column] - ar_money
+                                        df_bill_code.loc[t_index, n_r_column] = \
+                                            df_bill_code.loc[t_index, n_r_column] - ar_money
                                         ar_money = 0
                                         tract_list.append(t_r[location_day])
                                         tract_list.append(str(ar_money) + "(全部金额)")
 
                                 if ar_money > 0:
                                     for t_index, t_r in df_bill_code.iterrows():
-                                        df.loc[t_index, location_day] = t_r[location_day] + ar_money
-                                        t_r[location_day] = t_r[location_day] + ar_money
-                                        df.loc[t_index, r_i_column] = t_r[r_i_column] + ar_money
-                                        t_r[r_i_column] = t_r[r_i_column] + ar_money
-                                        df.loc[t_index, n_r_column] = t_r[n_r_column] - ar_money
-                                        t_r[n_r_column] = t_r[n_r_column] - ar_money
+                                        df.loc[t_index, location_day] = \
+                                            df_bill_code.loc[t_index, location_day] + ar_money
+                                        df_bill_code.loc[t_index, location_day] = \
+                                            df_bill_code.loc[t_index, location_day] + ar_money
+                                        df.loc[t_index, r_i_column] = \
+                                            df_bill_code.loc[t_index, r_i_column] + ar_money
+                                        df_bill_code.loc[t_index, r_i_column] = \
+                                            df_bill_code.loc[t_index, r_i_column] + ar_money
+                                        df.loc[t_index, n_r_column] = \
+                                            df_bill_code.loc[t_index, n_r_column] - ar_money
+                                        df_bill_code.loc[t_index, n_r_column] = \
+                                            df_bill_code.loc[t_index, n_r_column] - ar_money
                                         break
                             else:
                                 df_insert_list.append(row)
@@ -247,7 +267,7 @@ class ARDayFileParser(AbstractDefaultFileParser):
                             df_insert_list.append(row)
 
                     sheet.range((describe_excel.start_row + 1, int(target_begin_date_column) + 1)).value = \
-                        df.loc[:, target_begin_date_column: str(day_end)].values.tolist()
+                        df.loc[:, target_begin_date_column: str(day_end)].values
 
                     if len(df_insert_list) > 0:
                         df_empty = df[(df[target_bill_code_column] == "0")
@@ -266,7 +286,8 @@ class ARDayFileParser(AbstractDefaultFileParser):
                                     df.loc[iter_row[0], target_pay_client_name_column] \
                                         = df_insert[water_client_name_column].strip()
                                     sheet.range((describe_excel.start_row + 1 + iter_row[0], 1)).value = \
-                                        df.loc[iter_row[0]].values.tolist()
+                                        df.loc[iter_row[0]].values
+                                    break
 
                 finally:
                     wb.save()

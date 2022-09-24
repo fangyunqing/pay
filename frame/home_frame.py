@@ -31,12 +31,19 @@ class HomeFrame(ttk.Frame):
         ttk.Button(master=title_fr,
                    text="还原选择项",
                    command=self.restore_option).pack(side=ttk.LEFT, padx=5, pady=5)
-        ttk.Button(master=title_fr,
-                   text="开始",
-                   command=self.start).pack(side=ttk.LEFT, padx=5, pady=5)
+
         # 选择项
         choose_fr = ttk.Frame(self)
         choose_fr.pack(side=ttk.TOP, fill=ttk.X)
+
+        start_fr = ttk.Frame(choose_fr)
+        start_fr.pack(side=ttk.LEFT, fill=ttk.BOTH, padx=5, pady=5)
+        ttk.Button(master=start_fr,
+                   text="开始",
+                   width=20,
+                   bootstyle="success",
+                   command=self.start).pack(side=ttk.LEFT, fill=ttk.BOTH, padx=5, pady=5)
+
         self.nb_option = ttk.Notebook(master=choose_fr)
         self.nb_option.pack(side=ttk.LEFT, fill=ttk.BOTH, expand=ttk.YES, padx=5, pady=5)
         for pay in self.pay_manager.pay_list:
@@ -45,6 +52,7 @@ class HomeFrame(ttk.Frame):
             self.option_fr_list.append(tab_fr)
             ttk.Checkbutton(master=title_fr, onvalue=1, offvalue=0, text=pay.pay_name()[1], variable=tab_fr.enable)\
                 .pack(side=ttk.LEFT, padx=5, pady=5)
+
 
         # 信息提示项
         message_fr = ttk.Frame(self)

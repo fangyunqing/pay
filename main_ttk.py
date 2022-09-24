@@ -9,7 +9,6 @@ import ttkbootstrap as ttk
 from frame.primary_frame import PrimaryFrame
 import traceback
 from ttkbootstrap.dialogs.dialogs import Messagebox
-import xlrd
 
 
 def print_exception(exc, val, tb):
