@@ -10,13 +10,14 @@ from pay.supplier_pay import SupplierPay
 from pay.group_pay import GroupPay
 from util.model_util import ModelUtil
 from pay.dept_pay import DeptPay
+from pay.reconciliation_pay import ReconciliationPay
 
 
 class PayManager:
 
     def __init__(self):
         self.calls = 3
-        self.pay_list = [SupplierPay(), GroupPay(), DeptPay(), ARDayPay()]
+        self.pay_list = [SupplierPay(), GroupPay(), DeptPay(), ARDayPay(), ReconciliationPay()]
 
     @staticmethod
     def _is_ignore_file(file):

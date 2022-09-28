@@ -20,6 +20,6 @@ class SimplePathParser(PathParser):
             file_path = os.path.join(path, file)
             if os.path.isfile(file_path):
                 if not self._is_ignore_file(file):
-                    file = file.replace(".xlsx", "").replace(".xls", "")
+                    file = file.replace(".xlsx", "").replace(".xls", "").strip()
                     file_dict[file] = [file_path]
         return None, file_dict, None

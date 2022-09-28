@@ -30,6 +30,10 @@ class DefaultFileCopy(FileCopy):
         :param target: 复制文件名称 None 用模板文件的名称
         :return:
         """
+
+        if prefix_date is None:
+            prefix_date = ""
+
         template_name = os.path.basename(template_file)
         template_ext = os.path.splitext(template_file)[1]
         if target is None:

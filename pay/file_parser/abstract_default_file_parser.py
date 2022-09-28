@@ -97,7 +97,7 @@ class AbstractDefaultFileParser(AbstractFileParser):
                     if cell == "合计":
                         total_row_list.append(row_index)
                         break
-            # 第一列
+            # 第一_write_sheet_list列
             first_row_index = []
             vc = df_parse.iloc[0].value_counts()
             for v in df_parse.iloc[0].unique():

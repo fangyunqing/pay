@@ -33,7 +33,6 @@ water_bill_code = "water_bill_code"
 bill_code = "bill_code"
 map_water_bill_code = "map_water_bill_code"
 map_water_client_name = "map_water_client_name"
-map_bill_code = "map_bill_code"
 ar_date = "ar_date"
 ar_begin_date = "ar_begin_date"
 ar_end_date = "ar_end_date"
@@ -45,3 +44,18 @@ pay_client_name = "client_name"
 water_client_name = "water_client_name"
 tract = "tract"
 
+# map
+map_file = "map_file"
+map_bill_code = "map_bill_code"
+map_use_column = "map_use_column"
+
+# data
+data_file = "data_file"
+data_bill_code = "data_bill_code"
+data_use_column = "data_use_column"
+
+# map和data对照
+map_data = "map_data"
+
+# 未发现
+write_not_found_sheet = "write_not_found_sheet"

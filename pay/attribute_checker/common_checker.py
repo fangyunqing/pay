@@ -142,3 +142,21 @@ class CommonChecker:
             return val
         except Exception:
             raise Exception("配置项[%s]:[%s]不是一个有效时间格式" % (key, val))
+
+    @classmethod
+    def check_map_column(cls, key, val):
+        """
+            检测列对照 分号作为分隔符
+        :param key:
+        :param val:
+        :return:
+        """
+        if ":" not in val:
+            raise Exception("配置项[%s]:[%s]格式必须为 A:A:0" % (key, val))
+        val_list = val.split(":")
+        if len(val_list) < 3:
+            raise Exception("配置项[%s]:[%s]格式必须为 A:A:0" % (key, val))
+        val1 = cls.check_excel_map(key, val_list[0])
+        val2 = cls.check_excel_map(key, val_list[1])
+        val3 = val_list[2]
+        return val1 + ":" + val2 + ":" + val3
