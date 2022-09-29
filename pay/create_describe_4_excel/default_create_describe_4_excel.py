@@ -34,6 +34,12 @@ class DefaultCreateDescribe4Excel(CreateDescribe4Excel):
             for v in df.iloc[0].unique():
                 first_row_index.append(vc[v])
 
+            # 判断是否是时间类型
+            dt_column = []
+            for i, v in df.dtypes.items():
+                if "time" in v.name:
+                    dt_column.append(i)
+
             if len(write_sheet_list) - 1 >= index:
                 write_sheet = write_sheet_list[index]
             else:
@@ -49,6 +55,7 @@ class DefaultCreateDescribe4Excel(CreateDescribe4Excel):
             describe_excel.total_row = total_row_list
             describe_excel.first_row_index = first_row_index
             describe_excel.detail = True if index > 0 else False
+            describe_excel.dt_column = dt_column
             describe_excel_list.append(describe_excel)
 
         return describe_excel_list

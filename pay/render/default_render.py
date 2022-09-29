@@ -27,8 +27,7 @@ class DefaultRender(Render):
                     column_begin = describe_excel.start_column + 1
                     column_end = describe_excel.start_column + describe_excel.column
                     rng = sheet.range((row_begin, column_begin), (row_end, column_end))
-                    # 隐藏0 保留小数位0
-                    rng.number_format = '[=0]"";###,###'
+                    # 边框
                     rng.api.Borders(7).Weight = 2
                     rng.api.Borders(7).LineStyle = 1
                     rng.api.Borders(8).Weight = 2
@@ -43,6 +42,10 @@ class DefaultRender(Render):
                     rng.api.Borders(12).LineStyle = 1
                     rng.font.size = 12
                     rng.font.name = "微软雅黑"
+                    # 千分位
+                    for c in range(column_begin, column_end + 1):
+                        if str(c-1) not in describe_excel.dt_column:
+                            sheet.range((row_begin, c), (row_end, c)).number_format = '[=0]"";###,###.00'
 
                     self._other_render(sheet=sheet, attribute_manager=attribute_manager)
                 finally:

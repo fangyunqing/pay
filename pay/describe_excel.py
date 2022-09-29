@@ -18,3 +18,4 @@ class DescribeExcel:
         self.total_row = None
         self.first_row_index = None
         self.detail = None
+        self.dt_column = None
