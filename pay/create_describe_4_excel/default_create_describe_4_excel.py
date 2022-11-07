@@ -30,8 +30,8 @@ class DefaultCreateDescribe4Excel(CreateDescribe4Excel):
                         break
             # 第一列
             first_row_index = []
-            vc = df.iloc[0].value_counts()
-            for v in df.iloc[0].unique():
+            vc = df["0"].value_counts()
+            for v in df["0"].unique():
                 first_row_index.append(vc[v])
 
             # 判断是否是时间类型

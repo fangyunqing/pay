@@ -5,10 +5,8 @@
 
 __author__ = 'fyq'
 
-
 import pandas as pd
 from pay.write_excel.write_excel import WriteExcel
-
 
 
 class DefaultWriteExcel(WriteExcel):
@@ -19,7 +17,7 @@ class DefaultWriteExcel(WriteExcel):
                             mode="a",
                             if_sheet_exists="overlay") as writer:
             if hasattr(writer, "datetime_format"):
-                setattr(writer, "datetime_format", "YYYY-MM-DD")
+                setattr(writer, "_datetime_format", "YYYY-MM-DD")
             elif hasattr(writer, "_datetime_format"):
                 setattr(writer, "_datetime_format", "YYYY-MM-DD")
 

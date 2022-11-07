@@ -12,5 +12,6 @@ class DefaultResetIndex(ResetIndex):
 
     def reset_index(self, df_list, attribute_manager):
         for df in df_list:
-            df.columns = [str(r) for r in range(0, len(df.columns))]
-            df.index = range(0, len(df.index))
+            if df is not None:
+                df.columns = [str(r) for r in range(0, len(df.columns))]
+                df.index = range(0, len(df.index))

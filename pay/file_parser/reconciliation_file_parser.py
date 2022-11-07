@@ -62,7 +62,7 @@ class ReconciliationFileParser(AbstractMapFileParser):
                 else:
                     df[diff_column] = ""
                     df[diff_column + "-1"] = ""
-                    data_sum = df[data_diff].sum()
+                    data_sum = round(df[data_diff].sum(), 6)
                     if data_sum != r[map_diff]:
                         first_row = df.iloc[0]
                         first_row[diff_column] = r[map_diff]
