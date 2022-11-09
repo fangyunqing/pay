@@ -59,3 +59,6 @@ map_data = "map_data"
 
 # 未发现
 write_not_found_sheet = "write_not_found_sheet"
+
+# 对照类型
+reconciliation_type = "reconciliation_type"

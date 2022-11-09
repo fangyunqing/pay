@@ -86,4 +86,4 @@ class ReconciliationFileParser(AbstractMapFileParser):
         DefaultRender().render(describe_excel_list, attribute_manager, target_file)
 
     def support(self, pay_type):
-        return True
+        return "单一"

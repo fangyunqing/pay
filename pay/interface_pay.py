@@ -121,7 +121,7 @@ class InterfacePay(metaclass=ABCMeta):
                                                  target_file=target_file,
                                                  attribute_manager=am)
                 elif isinstance(self._file_parser, list):
-                    pay_type = self.pay_name()[0] + "." + self.map_pay_option(attribute_name)
+                    pay_type = self.pay_type(attribute_name, am)
                     for fp in self._file_parser:
                         if isinstance(fp, FileParser) and fp.support(pay_type):
                             fp.parse_file(file_dict=file_dict,
@@ -172,3 +172,6 @@ class InterfacePay(metaclass=ABCMeta):
     @abstractmethod
     def pay_options(self):
         pass
+
+    def pay_type(self, attribute_name, am):
+        return self.pay_name()[0] + "." + self.map_pay_option(attribute_name)
