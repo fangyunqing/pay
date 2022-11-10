@@ -68,6 +68,7 @@ class SetFrame(ttk.Frame):
                                         label_text=attribute.text,
                                         button_command="detail",
                                         entry_type=attribute.data_type,
+                                        cb_values=attribute.cb_values,
                                         label_width=12,
                                         label_wrap_length=80)
                     cf.pack(side=ttk.TOP, fill=ttk.X, padx=10, pady=10)

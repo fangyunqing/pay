@@ -1,6 +1,6 @@
-# @Time    : 22/08/26 15:31
+# @Time    : 22/11/09 10:27
 # @Author  : fyq
-# @File    : simple_path_parser.py
+# @File    : pdf_path_parser.py
 # @Software: PyCharm
 
 __author__ = 'fyq'
@@ -10,7 +10,11 @@ from pay.path_parser.path_parser import PathParser
 from pay.decorator.pay_log import PayLog
 
 
-class SimplePathParser(PathParser):
+class PdfPathParser(PathParser):
+
+    @classmethod
+    def _is_ignore_file(cls, file):
+        return file.startswith("~") or file in (".", "..") or not file.endswith(".pdf")
 
     @PayLog(node="解析路径")
     def parse_path(self, path, date_length):
@@ -19,6 +23,10 @@ class SimplePathParser(PathParser):
             file_path = os.path.join(path, file)
             if os.path.isfile(file_path):
                 if not self._is_ignore_file(file):
-                    file = file.replace(".xlsx", "").replace(".xls", "").strip()
+                    file = file.replace(".pdf", "")
                     file_dict[file] = [file_path]
         return None, file_dict, None
+
+
+
+

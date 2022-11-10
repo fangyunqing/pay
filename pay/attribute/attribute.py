@@ -8,16 +8,18 @@ __author__ = 'fyq'
 
 class Attribute:
 
-    def __init__(self, name, value, text, data_type, required):
+    def __init__(self, name, value, text, data_type, required, cb_values=None):
         """
         :param name: 名称
         :param value: 值
         :param text: 文本
         :param data_type: 类型
         :param required: 是否必填
+        :param cb_values: 默认值
         """
         self.name = name
         self.value = value
         self.text = text
         self.data_type = data_type
         self.required = required
+        self.cb_values = cb_values

@@ -61,4 +61,11 @@ map_data = "map_data"
 write_not_found_sheet = "write_not_found_sheet"
 
 # 对照类型
-reconciliation_type = "reconciliation_type"
+category = "category"
+
+# pdf
+pdf_file = "pdf_file"
+
+# 列数 行数
+row_number = "row_number"
+column_number = "column_number"

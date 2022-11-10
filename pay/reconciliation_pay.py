@@ -75,7 +75,6 @@ class ReconciliationPay(InterfacePay):
                                    data_type="str",
                                    required=True))
 
-    def pay_type(self, attribute_name, am):
-        return am.value(pc.reconciliation_type)
+
 
 

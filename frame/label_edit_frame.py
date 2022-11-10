@@ -77,6 +77,8 @@ class LabelEditFrame(ttk.Frame):
         # 时间类型
         if self.entry_type == "date":
             self.edit_type = self.DATE_ENTRY
+        elif self.entry_type == "combobox":
+            self.edit_type = self.COMBOBOX
         # 保存的值
         if self.edit_type in [self.ENTRY, self.COMBOBOX]:
             if self.edit_type == self.ENTRY:
