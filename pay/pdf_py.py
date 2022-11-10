@@ -6,6 +6,7 @@
 __author__ = 'fyq'
 
 from pay.attribute.attribute import Attribute
+from pay.attribute_checker import PDFAttributeChecker
 from pay.file_parser.wei_lin_pdf_file_parser import WeiLinPafFileParser
 from pay.interface_pay import InterfacePay
 from pay.path_parser.pdf_path_parser import PdfPathParser
@@ -25,10 +26,11 @@ class PdfPay(InterfacePay):
         self._path_parser = PdfPathParser()
         am = self._attribute_manager_dict["other"]
         self._file_parser = [WeiLinPafFileParser()]
+        self._attribute_checker_list = [PDFAttributeChecker()]
         am.clear()
         am.add(attribute=Attribute(name=pc.pdf_file,
                                    value="",
-                                   text="[pdf文件]信息[文件名,default,跳过的行数]",
+                                   text="[pdf文件]信息[文件名,列数]",
                                    required=True,
                                    data_type="str"))
         am.add(attribute=Attribute(name=pc.use_column,

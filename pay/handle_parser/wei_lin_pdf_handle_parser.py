@@ -15,21 +15,21 @@ from util import format_date
 class WeiLinPdfHandleParser(HandleParser):
 
     @staticmethod
-    def _new_line(df, line_list, line_info, start_word):
+    def _new_line(df, line_list, line_info, start_word, bill_code_prefix):
         material_list = []
         for index, l_t in enumerate(line_list):
             split_list = str(l_t).split()
             if len(split_list) > 0:
                 # 第一行完整的数据
                 if index == 0:
-                    if split_list[0] == start_word:
+                    if split_list[0] in start_word:
                         line_info = split_list
                     else:
-                        line_info.append(start_word)
+                        line_info.append("")
                         line_info.extend(split_list)
                 else:
                     for s_i, s_l in enumerate(split_list):
-                        if s_l.startswith("DGS"):
+                        if s_l.startswith(bill_code_prefix):
                             line_info.append(split_list.pop(s_i))
                             break
                     material_list.extend(split_list)
@@ -49,7 +49,13 @@ class WeiLinPdfHandleParser(HandleParser):
         # 读取文件
         file_name = file_dict[file_info[0]][0]
         # 跳过的文本
-        skip_text = "採購單號"
+        skip_text = file_info[2]
+        # 列数
+        column_number = int(file_info[1])
+        # 单号前缀
+        bill_code_prefix = file_info[3]
+        # 排除行
+        exclude_line_list = ("應付小計:", "備注:", "應扣", "除帳小計", "扣%金額", "贊助金", "總合計", "核准")
         # 解析pdf
         with pdfplumber.open(file_name) as pdf:
             text_list = []
@@ -58,21 +64,21 @@ class WeiLinPdfHandleParser(HandleParser):
                 find = False
                 for line in line_list:
                     if find:
-                        if "應付小計:" not in line and "備注:" not in line and "應扣" not in line:
+                        if not line.startswith(exclude_line_list):
                             text_list.append(line)
                     elif line.startswith(skip_text):
                         find = True
-            # 12列 DataFrame
-            df = pandas.DataFrame(columns=[str(r) for r in range(0, 12)])
+            # DataFrame
+            df = pandas.DataFrame(columns=[str(r) for r in range(0, column_number)])
             if len(text_list) > 0:
-                start_word = text_list[0].split()[0]
+                start_word = ["除帳", "應付"]
                 new_line = False
                 line_list = []
                 line_info = []
                 for text in text_list:
                     split_list = text.split()
                     if len(split_list) > 0:
-                        if split_list[0] == start_word or format_date(split_list[0]):
+                        if split_list[0] in start_word or format_date(split_list[0]):
                             new_line = True
                         else:
                             line_list.append(text)
@@ -82,7 +88,8 @@ class WeiLinPdfHandleParser(HandleParser):
                                 self._new_line(df=df,
                                                line_list=line_list,
                                                line_info=line_info,
-                                               start_word=start_word)
+                                               start_word=start_word,
+                                               bill_code_prefix=bill_code_prefix)
                                 line_list = []
                                 line_info = []
                             line_list.append(text)
@@ -91,8 +98,9 @@ class WeiLinPdfHandleParser(HandleParser):
                     self._new_line(df=df,
                                    line_list=line_list,
                                    line_info=line_info,
-                                   start_word=start_word)
-
+                                   start_word=start_word,
+                                   bill_code_prefix=bill_code_prefix)
+            df['0'].replace("", method="pad", inplace=True)
             # 去除无用的列
             df.columns = [str(column) for column in df.columns]
             useless_column = []

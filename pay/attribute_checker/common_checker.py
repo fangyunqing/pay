@@ -160,3 +160,17 @@ class CommonChecker:
         val2 = cls.check_excel_map(key, val_list[1])
         val3 = val_list[2]
         return val1 + ":" + val2 + ":" + val3
+
+    @classmethod
+    def check_pdf_file(cls, key, val):
+        """
+            pdf文件 eg: pdf文件名,列数
+        :param key:
+        :param val:
+        :return:
+        """
+        sheet_info_list = list(val.split(","))
+        if len(sheet_info_list) < 4:
+            raise Exception("配置项[%s]:[%s]格式必须为 pdf文件名,列数,跳过的文本,单号前缀" % (key, val))
+        if not str(sheet_info_list[1]).isdigit():
+            raise Exception("配置项[%s]:[%s]中列数必须为正数" % (key, val))

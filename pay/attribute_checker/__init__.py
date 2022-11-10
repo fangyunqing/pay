@@ -4,3 +4,5 @@
 # @Software: PyCharm
 
 __author__ = 'fyq'
+
+from .pdf_attribute_checker import PDFAttributeChecker

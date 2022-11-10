@@ -5,8 +5,6 @@
 
 __author__ = 'fyq'
 
-
-
 from pay.attribute.attribute import Attribute
 from pay.file_parser.wei_lin_pdf_file_parser import WeiLinPafFileParser
 from pay.interface_pay import InterfacePay
@@ -28,16 +26,6 @@ class MultipleMapPay(InterfacePay):
         am = self._attribute_manager_dict["other"]
         self._file_parser = [WeiLinPafFileParser()]
         am.clear()
-        am.add(attribute=Attribute(name=pc.pdf_file,
-                                   value="",
-                                   text="[pdf文件]信息[文件名,default,跳过的行数]",
-                                   required=True,
-                                   data_type="str"))
-        am.add(attribute=Attribute(name=pc.use_column,
-                                   value="",
-                                   text="[pdf文件]需要的列(A,B,C)",
-                                   required=True,
-                                   data_type="str"))
         am.add(attribute=Attribute(name=pc.write_sheet,
                                    value="",
                                    text="[模板]写入的工作簿名称[工作簿名,行]",
@@ -48,7 +36,7 @@ class MultipleMapPay(InterfacePay):
                                    text="所属类型",
                                    data_type="combobox",
                                    required=True,
-                                   cb_values=["威霖"]))
+                                   cb_values=["反倾销"]))
 
     def pay_type(self, attribute_name, am):
         return am.value(pc.category)
