@@ -12,7 +12,7 @@ import pandas as pd
 
 class DefaultHandleParser(HandleParser):
 
-    def handle_parser(self, file_dict, file_info, use_column_list):
+    def handle_parser(self, file_dict, file_info, use_column_list, attribute_manager):
         # 文件是否存在
         if file_info[0] not in file_dict:
             raise Exception("对照文件[%s]中未找到" % file_info[0])

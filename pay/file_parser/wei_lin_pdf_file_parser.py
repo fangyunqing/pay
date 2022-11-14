@@ -20,7 +20,8 @@ class WeiLinPafFileParser(AbstractPdfFileParser):
         map_use_column_list = list(attribute_manager.value(pc.use_column).split(","))
         map_df = WeiLinPdfHandleParser().handle_parser(file_dict=file_dict,
                                                        file_info=map_file_info,
-                                                       use_column_list=map_use_column_list)
+                                                       use_column_list=map_use_column_list,
+                                                       attribute_manager=attribute_manager)
         map_df.dropna(inplace=True)
         return [map_df]
 

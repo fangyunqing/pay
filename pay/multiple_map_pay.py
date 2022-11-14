@@ -6,9 +6,9 @@
 __author__ = 'fyq'
 
 from pay.attribute.attribute import Attribute
-from pay.file_parser.wei_lin_pdf_file_parser import WeiLinPafFileParser
+from pay.file_parser.multiple_map import AntiDumpingFileParser
 from pay.interface_pay import InterfacePay
-from pay.path_parser.pdf_path_parser import PdfPathParser
+from pay.path_parser import DeepPathParser
 import pay.constant as pc
 
 
@@ -22,9 +22,9 @@ class MultipleMapPay(InterfacePay):
 
     def __init__(self):
         super(MultipleMapPay, self).__init__()
-        self._path_parser = PdfPathParser()
         am = self._attribute_manager_dict["other"]
-        self._file_parser = [WeiLinPafFileParser()]
+        self._file_parser = [AntiDumpingFileParser()]
+        self._path_parser = DeepPathParser()
         am.clear()
         am.add(attribute=Attribute(name=pc.write_sheet,
                                    value="",

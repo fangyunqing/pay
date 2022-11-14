@@ -16,13 +16,21 @@ class CommonChecker:
         "M": "12", "N": "13", "O": "14", "P": "15",
         "Q": "16", "R": "17", "S": "18", "T": "19",
         "U": "20", "V": "21", "W": "22", "X": "23",
-        "Y": "24", "Z": "25", "AA": "26", "AB": "27",
-        "AC": "28", "AD": "29", "AE": "30", "AF": "31",
-        "AG": "32", "AH": "33", "AI": "34", "AJ": "35",
-        "AK": "36", "AL": "37", "AM": "38", "AN": "39",
-        "AO": "40", "AP": "41", "AQ": "42", "AR": "43",
-        "AS": "44", "AT": "45", "AU": "46", "AV": "47",
-        "AW": "48", "AX": "49", "AY": "50", "AZ": "51",
+        "Y": "24", "Z": "25",
+        "AA": "26", "AB": "27", "AC": "28", "AD": "29",
+        "AE": "30", "AF": "31", "AG": "32", "AH": "33",
+        "AI": "34", "AJ": "35", "AK": "36", "AL": "37",
+        "AM": "38", "AN": "39", "AO": "40", "AP": "41",
+        "AQ": "42", "AR": "43", "AS": "44", "AT": "45",
+        "AU": "46", "AV": "47", "AW": "48", "AX": "49",
+        "AY": "50", "AZ": "51",
+        "BA": "52", "BB": "53", "BC": "54", "BD": "55",
+        "BE": "56", "BF": "57", "BG": "58", "BH": "59",
+        "BI": "60", "BJ": "61", "BK": "62", "BL": "63",
+        "BM": "64", "BN": "65", "BO": "66", "BP": "67",
+        "BQ": "68", "BR": "69", "BS": "70", "BT": "71",
+        "BU": "72", "BV": "73", "BW": "74", "BX": "75",
+        "BY": "76", "BZ": "77",
     }
 
     @classmethod
@@ -170,7 +178,40 @@ class CommonChecker:
         :return:
         """
         sheet_info_list = list(val.split(","))
-        if len(sheet_info_list) < 4:
-            raise Exception("配置项[%s]:[%s]格式必须为 pdf文件名,列数,跳过的文本,单号前缀" % (key, val))
+        if len(sheet_info_list) < 2:
+            raise Exception("配置项[%s]:[%s]格式必须为 pdf文件名,列数" % (key, val))
         if not str(sheet_info_list[1]).isdigit():
             raise Exception("配置项[%s]:[%s]中列数必须为正数" % (key, val))
+
+    @classmethod
+    def check_check_data(cls, key, val):
+        """
+            校对 eg A:B A-B = 0
+        :param key:
+        :param val:
+        :return:
+        """
+        split_list = list(val.split(","))
+        new_list = []
+        for s in split_list:
+            s_list = list(s.split(":"))
+            if len(s_list) < 2:
+                raise Exception("配置项[%s]:[%s]格式必须为 A:B,C:D" % (key, val))
+            val1 = cls.check_excel_map(key, s_list[0])
+            val2 = cls.check_excel_map(key, s_list[1])
+
+            new_list.append(val1 + ":" + val2)
+
+        return ",".join(new_list)
+
+    @classmethod
+    def check_check_result(cls, key, val):
+        """
+            校对结果 result1,result2 eg 剔除,拆单
+        :param key:
+        :param val:
+        :return:
+        """
+        split_list = list(val.split(","))
+        if len(split_list) < 2:
+            raise Exception("配置项[%s]:[%s]格式必须为 result1,result2 eg 剔除,拆单" % (key, val))

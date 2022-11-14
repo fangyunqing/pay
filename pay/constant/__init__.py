@@ -69,3 +69,25 @@ pdf_file = "pdf_file"
 # 列数 行数
 row_number = "row_number"
 column_number = "column_number"
+
+# 校对
+check_data = "check_data"
+# 校对结果
+check_result = "check_result"
+
+# 聚合的列
+group_column = "group_column"
+
+# 跳过的文本
+skip_text = "skip_text"
+
+# 单号前缀
+bill_code_prefix = "bill_code_prefix"
+
+# 跨行列
+across_column = "across_column"
+
+# 单位
+unit = "unit"
+
+

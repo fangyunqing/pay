@@ -6,6 +6,7 @@
 __author__ = 'fyq'
 
 from pay.ar_day_pay import ARDayPay
+from pay.check_pay import CheckPay
 from pay.multiple_map_pay import MultipleMapPay
 from pay.pdf_py import PdfPay
 from pay.supplier_pay import SupplierPay
@@ -19,7 +20,9 @@ class PayManager:
 
     def __init__(self):
         self.calls = 3
-        self.pay_list = [SupplierPay(), GroupPay(), DeptPay(), ARDayPay(), ReconciliationPay(), PdfPay(), MultipleMapPay()]
+        self.pay_list = [SupplierPay(), GroupPay(), DeptPay(), ARDayPay(),
+                         ReconciliationPay(), PdfPay(), MultipleMapPay(),
+                         CheckPay()]
 
     @staticmethod
     def _is_ignore_file(file):

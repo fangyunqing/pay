@@ -22,7 +22,8 @@ class ReconciliationFileParser(AbstractMapFileParser):
         map_use_column_list = list(attribute_manager.value(pc.map_use_column).split(","))
         map_df = DefaultHandleParser().handle_parser(file_dict=file_dict,
                                                      file_info=map_file_info,
-                                                     use_column_list=map_use_column_list)
+                                                     use_column_list=map_use_column_list,
+                                                     attribute_manager=attribute_manager)
         map_df.dropna(inplace=True)
         return map_df
 
@@ -31,7 +32,8 @@ class ReconciliationFileParser(AbstractMapFileParser):
         data_use_column_list = list(attribute_manager.value(pc.data_use_column).split(","))
         return DefaultHandleParser().handle_parser(file_dict=file_dict,
                                                    file_info=data_file_info,
-                                                   use_column_list=data_use_column_list)
+                                                   use_column_list=data_use_column_list,
+                                                   attribute_manager=attribute_manager)
 
     def _do_merger(self, map_df, data_df, attribute_manager):
         map_bill_code = attribute_manager.value(pc.map_bill_code)

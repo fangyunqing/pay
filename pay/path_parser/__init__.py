@@ -5,6 +5,5 @@
 
 __author__ = 'fyq'
 
-from pay.path_parser.default_path_parser import DefaultPathParser
-
-__all__ = [DefaultPathParser]
+from .default_path_parser import DefaultPathParser
+from .deep_path_parser import DeepPathParser

@@ -11,5 +11,5 @@ from abc import ABCMeta, abstractmethod
 class HandleParser(metaclass=ABCMeta):
 
     @abstractmethod
-    def handle_parser(self, file_dict, file_info, use_column_list):
+    def handle_parser(self, file_dict, file_info, use_column_list, attribute_manager):
         pass

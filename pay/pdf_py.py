@@ -30,13 +30,33 @@ class PdfPay(InterfacePay):
         am.clear()
         am.add(attribute=Attribute(name=pc.pdf_file,
                                    value="",
-                                   text="[pdf文件]信息[文件名,列数]",
+                                   text="[pdf文件]信息[pdf文件名,列数]",
                                    required=True,
                                    data_type="str"))
         am.add(attribute=Attribute(name=pc.use_column,
                                    value="",
                                    text="[pdf文件]需要的列(A,B,C)",
                                    required=True,
+                                   data_type="str"))
+        am.add(attribute=Attribute(name=pc.bill_code_prefix,
+                                   value="",
+                                   text="[pdf文件]单号前缀",
+                                   required=True,
+                                   data_type="str"))
+        am.add(attribute=Attribute(name=pc.skip_text,
+                                   value="",
+                                   text="[pdf文件]每页跳过的文本",
+                                   required=True,
+                                   data_type="str"))
+        am.add(attribute=Attribute(name=pc.across_column,
+                                   value="",
+                                   text="[pdf文件]跨行的列(A)",
+                                   required=True,
+                                   data_type="str"))
+        am.add(attribute=Attribute(name=pc.unit,
+                                   value="",
+                                   text="[pdf文件]单位",
+                                   required=False,
                                    data_type="str"))
         am.add(attribute=Attribute(name=pc.write_sheet,
                                    value="",

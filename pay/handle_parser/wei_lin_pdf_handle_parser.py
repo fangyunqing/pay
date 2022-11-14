@@ -9,13 +9,14 @@ import pandas
 import pdfplumber
 
 from pay.handle_parser.handle_parser import HandleParser
-from util import format_date
+from util import format_date, re_startswith
+import pay.constant as pc
 
 
 class WeiLinPdfHandleParser(HandleParser):
 
     @staticmethod
-    def _new_line(df, line_list, line_info, start_word, bill_code_prefix):
+    def _new_line(df, line_list, line_info, start_word, bill_code_prefix, across_column, unit):
         material_list = []
         for index, l_t in enumerate(line_list):
             split_list = str(l_t).split()
@@ -29,33 +30,41 @@ class WeiLinPdfHandleParser(HandleParser):
                         line_info.extend(split_list)
                 else:
                     for s_i, s_l in enumerate(split_list):
-                        if s_l.startswith(bill_code_prefix):
-                            line_info.append(split_list.pop(s_i))
-                            break
-                    material_list.extend(split_list)
+                        if re_startswith(s_l, bill_code_prefix):
+                            line_info.append(split_list[s_i])
+                        else:
+                            material_list.append(split_list[s_i])
         if len(line_info) > len(df.columns):
-            for i in range(4, len(line_info)):
-                if str(line_info[i]).isdigit():
-                    line_info[3] = " ".join(line_info[3: i])
-                    line_info = line_info[0: 4] + line_info[i:]
+            for i in range(across_column + 1, len(line_info)):
+                if str(line_info[i]).isdigit() or str(line_info[i]) in unit:
+                    line_info[across_column] = " ".join(line_info[across_column: i])
+                    line_info = line_info[0: across_column + 1] + line_info[i:]
                     break
-        line_info[3] = line_info[3] + " " + " ".join(material_list)
+        line_info[across_column] = line_info[across_column] + " " + " ".join(material_list)
         df.loc[len(df.index)] = line_info
 
-    def handle_parser(self, file_dict, file_info, use_column_list):
+    def handle_parser(self, file_dict, file_info, use_column_list, attribute_manager):
         # 文件是否存在
         if file_info[0] not in file_dict:
             raise Exception("对照文件[%s]中未找到" % file_info[0])
         # 读取文件
         file_name = file_dict[file_info[0]][0]
         # 跳过的文本
-        skip_text = file_info[2]
+        skip_text = str(attribute_manager.value(pc.skip_text))
         # 列数
         column_number = int(file_info[1])
         # 单号前缀
-        bill_code_prefix = file_info[3]
+        bill_code_prefix = list(attribute_manager.value(pc.bill_code_prefix).split(","))
+        # 跨行列
+        across_column = int(attribute_manager.value(pc.across_column))
         # 排除行
         exclude_line_list = ("應付小計:", "備注:", "應扣", "除帳小計", "扣%金額", "贊助金", "總合計", "核准")
+        # 单位
+        unit = attribute_manager.value(pc.unit)
+        if unit is None:
+            unit = []
+        else:
+            unit = list(unit.split(","))
         # 解析pdf
         with pdfplumber.open(file_name) as pdf:
             text_list = []
@@ -89,7 +98,9 @@ class WeiLinPdfHandleParser(HandleParser):
                                                line_list=line_list,
                                                line_info=line_info,
                                                start_word=start_word,
-                                               bill_code_prefix=bill_code_prefix)
+                                               bill_code_prefix=bill_code_prefix,
+                                               across_column=across_column,
+                                               unit=unit)
                                 line_list = []
                                 line_info = []
                             line_list.append(text)
@@ -99,7 +110,10 @@ class WeiLinPdfHandleParser(HandleParser):
                                    line_list=line_list,
                                    line_info=line_info,
                                    start_word=start_word,
-                                   bill_code_prefix=bill_code_prefix)
+                                   bill_code_prefix=bill_code_prefix,
+                                   across_column=across_column,
+                                   unit=unit)
+            # 替换空字符串
             df['0'].replace("", method="pad", inplace=True)
             # 去除无用的列
             df.columns = [str(column) for column in df.columns]

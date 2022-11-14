@@ -20,6 +20,9 @@ class PDFAttributeChecker(IAttributeChecker):
             :param attribute:
             :return:
             """
+            if len(attribute.value.split(",")) == 4:
+                attribute.value = attribute.value + ",3"
+
             CommonChecker.check_pdf_file(attribute.text, attribute.value)
 
         def _check_use_column(attribute):
@@ -40,8 +43,17 @@ class PDFAttributeChecker(IAttributeChecker):
             """
             attribute.value = CommonChecker.check_write_sheet(attribute.text, attribute.value)
 
+        def _check_across_column(attribute):
+            """
+                跨行列
+            :param attribute:
+            :return:
+            """
+            attribute.value = CommonChecker.check_excel_map(attribute.text, attribute.value)
+
         return {
             pc.pdf_file: _check_pdf_file,
             pc.use_column: _check_use_column,
-            pc.write_sheet: _check_write_sheet
+            pc.write_sheet: _check_write_sheet,
+            pc.across_column: _check_across_column
         }
