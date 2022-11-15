@@ -216,7 +216,7 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
         DefaultRender().render(describe_excel_list, attribute_manager, target_file)
 
     def support(self, pay_type):
-        return "反倾销"
+        return "反倾销" == pay_type
 
     def _do_reset_index(self, df, attribute_manager):
         DefaultResetIndex().reset_index(df, attribute_manager)

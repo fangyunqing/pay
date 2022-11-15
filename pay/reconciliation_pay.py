@@ -7,7 +7,8 @@ __author__ = 'fyq'
 
 
 from pay.attribute_checker.reconciliation_attribute_checker import ReconciliationAttributeChecker
-from pay.file_parser.reconciliation_file_parser import ReconciliationFileParser
+from pay.file_parser.map import GreenSampleFileParser, TeBuProductFileParser
+from pay.file_parser.map.reconciliation_file_parser import ReconciliationFileParser
 from pay.interface_pay import InterfacePay
 from pay.attribute.attribute import Attribute
 import pay.constant as pc
@@ -25,7 +26,7 @@ class ReconciliationPay(InterfacePay):
     def __init__(self):
         super(ReconciliationPay, self).__init__()
         self._attribute_checker_list = [ReconciliationAttributeChecker()]
-        self._file_parser = ReconciliationFileParser()
+        self._file_parser = [ReconciliationFileParser(), GreenSampleFileParser(), TeBuProductFileParser()]
         self._path_parser = SimplePathParser()
         am = self._attribute_manager_dict["other"]
         am.clear()
@@ -34,19 +35,29 @@ class ReconciliationPay(InterfacePay):
                                    text="[对照文件]信息[文件名,工作簿名,跳过的行数]",
                                    required=True,
                                    data_type="str"))
-        am.add(attribute=Attribute(name=pc.map_bill_code,
-                                   value="",
-                                   text="[对照文件]订单号(A)",
-                                   required=True,
-                                   data_type="str"))
         am.add(attribute=Attribute(name=pc.map_use_column,
                                    value="",
                                    text="[对照文件]需要的列(A,B,C)",
                                    required=True,
                                    data_type="str"))
+        am.add(attribute=Attribute(name=pc.map_bill_code,
+                                   value="",
+                                   text="[对照文件]订单号(A)",
+                                   required=True,
+                                   data_type="str"))
+        am.add(attribute=Attribute(name=pc.map_spec_column,
+                                   value="",
+                                   text="[对照文件]特殊的列(A,B,C)",
+                                   required=False,
+                                   data_type="str"))
         am.add(attribute=Attribute(name=pc.data_file,
                                    value="",
                                    text="[数据文件]信息[文件名,工作簿名,跳过的行数]",
+                                   required=True,
+                                   data_type="str"))
+        am.add(attribute=Attribute(name=pc.data_use_column,
+                                   value="",
+                                   text="[数据文件]需要的列(A,B,C)",
                                    required=True,
                                    data_type="str"))
         am.add(attribute=Attribute(name=pc.data_bill_code,
@@ -54,10 +65,10 @@ class ReconciliationPay(InterfacePay):
                                    text="[数据文件]订单号(A)",
                                    required=True,
                                    data_type="str"))
-        am.add(attribute=Attribute(name=pc.data_use_column,
+        am.add(attribute=Attribute(name=pc.data_spec_column,
                                    value="",
-                                   text="[数据文件]需要的列(A,B,C)",
-                                   required=True,
+                                   text="[数据文件]特殊的列(A,B,C)",
+                                   required=False,
                                    data_type="str"))
         am.add(attribute=Attribute(name=pc.map_data,
                                    value="",
@@ -74,6 +85,20 @@ class ReconciliationPay(InterfacePay):
                                    text="[模板]未找到的工作簿名称[工作簿名,1]",
                                    data_type="str",
                                    required=True))
+        am.add(attribute=Attribute(name=pc.write_total_sheet,
+                                   value="",
+                                   text="[模板]统计的工作簿名称[工作簿名,1]",
+                                   data_type="str",
+                                   required=True))
+        am.add(attribute=Attribute(name=pc.category,
+                                   value="",
+                                   text="所属类型",
+                                   data_type="combobox",
+                                   required=True,
+                                   cb_values=["常用", "绿洲样品", "特步量产"]))
+
+    def pay_type(self, attribute_name, am):
+        return am.value(pc.category)
 
 
 

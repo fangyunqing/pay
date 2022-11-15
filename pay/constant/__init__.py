@@ -48,17 +48,23 @@ tract = "tract"
 map_file = "map_file"
 map_bill_code = "map_bill_code"
 map_use_column = "map_use_column"
+map_spec_column = "map_spec_column"
+ma_column = "唯一列"
 
 # data
 data_file = "data_file"
 data_bill_code = "data_bill_code"
 data_use_column = "data_use_column"
+data_spec_column = "data_spec_column"
 
 # map和data对照
 map_data = "map_data"
 
 # 未发现
 write_not_found_sheet = "write_not_found_sheet"
+
+# 统计
+write_total_sheet = "write_total_sheet"
 
 # 对照类型
 category = "category"

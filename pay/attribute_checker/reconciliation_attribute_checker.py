@@ -90,6 +90,25 @@ class ReconciliationAttributeChecker(IAttributeChecker):
             """
             attribute.value = CommonChecker.check_write_sheet(attribute.text, attribute.value)
 
+        def _check_spec_column(attribute):
+            """
+                特殊列
+            :param attribute:
+            :return:
+            """
+            if len(attribute.value) > 0:
+                column_list = []
+                for column in attribute.value.split(","):
+                    column_list.append(CommonChecker.check_excel_map(attribute.text, column))
+                attribute.value = ",".join(column_list)
+
+        def _check_write_total_sheet(attribute):
+            """
+                未找到的工作簿
+            :return:
+            """
+            attribute.value = CommonChecker.check_write_sheet(attribute.text, attribute.value)
+
         return {
             pc.map_file: _check_map_file,
             pc.map_bill_code: _check_map_bill_code,
@@ -100,4 +119,7 @@ class ReconciliationAttributeChecker(IAttributeChecker):
             pc.map_data:  _check_map_data,
             pc.write_sheet: _check_write_sheet,
             pc.write_not_found_sheet: _check_write_not_found_sheet,
+            pc.map_spec_column: _check_spec_column,
+            pc.data_spec_column: _check_spec_column,
+            pc.write_total_sheet: _check_write_total_sheet
         }

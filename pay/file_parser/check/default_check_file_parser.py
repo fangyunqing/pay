@@ -57,7 +57,7 @@ class DefaultCheckFileParser(AbstractCheckFileParser):
                             for combination_element in combination:
                                 combination_sum = combination_sum + left_value_list[combination_element - 1]
                                 combination_sum_map.append(line_list[combination_element - 1])
-                            if (combination_sum + right_value) == 0:
+                            if (round(combination_sum,6) + round(right_value, 6)) == 0:
                                 combination_result.append(combination_sum_map)
                         # 有抵消的值
                         if len(combination_result) > 0:
