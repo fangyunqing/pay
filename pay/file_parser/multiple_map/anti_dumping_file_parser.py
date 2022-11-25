@@ -59,7 +59,8 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
                         df_list = pd.read_excel(io=file_dict[key],
                                                 sheet_name=None,
                                                 skiprows=self.trade_name[1],
-                                                header=None)
+                                                header=None,
+                                                dtype={60: str})
                         if len(df_list) > 0:
                             trade_df_list.extend([df_list[key] for key in df_list.keys()])
                     elif self.bill_name[0] in key:
@@ -73,7 +74,8 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
                         df_list = pd.read_excel(io=file_dict[key],
                                                 sheet_name=None,
                                                 skiprows=self.inline_name[1],
-                                                header=None)
+                                                header=None,
+                                                dtype={36: str})
                         if len(df_list) > 0:
                             inline_df_list.extend([df_list[key] for key in df_list.keys()])
                     elif self.path_name[0] in key:
@@ -125,6 +127,8 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
                 split_list = bill_code.split("-")
                 data_df.loc[ind, 37] = split_list[0]
                 data_df.loc[ind, 38] = split_list[1]
+            elif len(bill_code) == 8:
+                data_df.loc[ind, 38] = bill_code
             else:
                 # transfer 物料编码(9) 数量(16)
                 # 贸易 单据编号(12) 物料编码(25) 数量(36) => 发票号(60)
@@ -177,7 +181,7 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
                              & (sale_df[48] == qty)]
                 if len(df) > 0:
                     data_df.loc[ind, 41] = df.iloc[0][26]
-                    if data_df.loc[ind, 41] == "财务综合仓":
+                    if data_df.loc[ind, 41] in ("财务综合仓", "财务专用综合仓"):
                         data_df.loc[ind, 40] = df.iloc[0][57]
                     data_df.loc[ind, 42] = df.iloc[0][25]
                     if data_df.loc[ind, 42] == "无路径":

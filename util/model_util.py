@@ -31,7 +31,9 @@ class ModelUtil:
             for k2 in f_data[k1].keys():
                 val = f_data[k1][k2]
                 if isinstance(val, str):
-                    f_data[k1][k2] = val.strip().replace('\n', '').replace('\r', '')
+                    val = val.strip()
+                    if "yaml" not in val:
+                        f_data[k1][k2] = val.replace('\n', '').replace('\r', '')
         return f_data
 
     def write_file(self, model_name, data, prefix=None):
@@ -70,7 +72,9 @@ class ModelUtil:
                     if key in data[pay_name].keys():
                         val = f_data[pay_name][key]
                         if isinstance(val, str):
-                            val = val.strip().replace('\n', '').replace('\r', '')
+                            val = val.strip()
+                            if "yaml" not in val:
+                                val = val.strip().replace('\n', '').replace('\r', '')
                         if isinstance(val, str) and prefix is not None:
                             if val.startswith(prefix):
                                 val = val[len(prefix):]

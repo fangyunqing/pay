@@ -14,7 +14,7 @@ class PdfPathParser(PathParser):
 
     @classmethod
     def _is_ignore_file(cls, file):
-        return file.startswith("~") or file in (".", "..") or not file.endswith(".pdf")
+        return file.startswith("~") or file in (".", "..") or (not file.endswith(".pdf") and not file.endswith(".PDF"))
 
     @PayLog(node="解析路径")
     def parse_path(self, path, date_length):
@@ -23,7 +23,7 @@ class PdfPathParser(PathParser):
             file_path = os.path.join(path, file)
             if os.path.isfile(file_path):
                 if not self._is_ignore_file(file):
-                    file = file.replace(".pdf", "")
+                    file = file.replace(".pdf", "").replace(".PDF", "")
                     file_dict[file] = [file_path]
         return None, file_dict, None
 

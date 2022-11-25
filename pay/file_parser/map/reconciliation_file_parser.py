@@ -13,12 +13,21 @@ import pay.constant as pc
 import pandas as pd
 from pay.handle_parser.default_handle_parser import DefaultHandleParser
 from pay.render.default_render import DefaultRender
+from util import remove_zero
 
 
 class ReconciliationFileParser(AbstractReconciliationFileParser):
+    """
+        普通应收对账 通过订单号查询
+    """
+
+    def _before_merger(self, map_df_info_list, data_df, attribute_manager):
+        pass
 
     def _after_parse_map(self, df, attribute_manager):
-        return df
+        map_bill_code = attribute_manager.value(pc.map_bill_code)
+        df[pc.new_bill_code] = df[map_bill_code]
+        return [df, [pc.new_bill_code]]
 
     def _doing_parse_map(self, file_dict, attribute_manager):
         map_file_info = str(attribute_manager.value(pc.map_file)).split(",")
@@ -30,6 +39,8 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
         return map_df
 
     def _after_parse_data(self, df, attribute_manager):
+        data_bill_code = attribute_manager.value(pc.data_bill_code)
+        df[pc.new_bill_code] = df[data_bill_code]
         return df
 
     def _doing_parse_data(self, file_dict, attribute_manager):
@@ -44,49 +55,45 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
     def _after_merger(self, df_list, attribute_manager):
         return df_list
 
-    def _doing_merger(self, map_df, data_df, attribute_manager):
+    def _doing_merger(self, map_df_info, data_df, attribute_manager):
+        # unpack
+        map_df, search_column_list = map_df_info
         self._modify_attribute_manager(map_df, data_df, attribute_manager)
         map_bill_code = attribute_manager.value(pc.map_bill_code)
-        data_bill_code = attribute_manager.value(pc.data_bill_code)
         map_data_list = list(attribute_manager.value(pc.map_data).split(","))
         df_list = []
         df_not_found_list = []
         s_total_list = []
 
-        map_unique_column = self._map_unique_column(map_bill_code)
-        data_unique_column = self._data_unique_column(data_bill_code)
-
-        def remove_zero(val):
-            val_list = list(val.split("."))
-            if len(val_list) > 1:
-                for val in val_list[1:]:
-                    if len(val) * '0' != val:
-                        return val
-                return val_list[0]
-            else:
-                return val
-
-        for map_unique in map_unique_column:
+        for map_unique in search_column_list:
             map_df[map_unique] = map_df[map_unique].astype("str", errors="ignore").apply(remove_zero)
 
-        for data_unique in data_unique_column:
+        for data_unique in search_column_list:
             data_df[data_unique] = data_df[data_unique].astype("str", errors="ignore").apply(remove_zero)
 
         for ri, r in map_df.iterrows():
 
-            df = self._search(map_row=r,
-                              data_df=data_df,
-                              attribute_manager=attribute_manager)
+            df = data_df
+            for search_column in search_column_list:
+                df = df.loc[df[search_column] == r[search_column]]
 
             if len(df.index) == 0:
                 df_not_found_list.append(r.to_frame().T)
                 continue
+
+            # 删除已经找到的数据
+            data_df.drop(labels=df.index, inplace=True)
+
+            self._doing_merger_modify(map_df_row=r,
+                                      data_df=df,
+                                      attribute_manager=attribute_manager)
+
             map_diff_list = []
             data_diff_list = []
 
-            s_total = pd.Series(index=map_unique_column)
+            s_total = pd.Series(index=search_column_list)
             s_total_list.append(s_total)
-            for map_unique in map_unique_column:
+            for map_unique in search_column_list:
                 s_total.loc[map_unique] = r[map_unique]
 
             for i, map_data in enumerate(map_data_list):
@@ -112,8 +119,9 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
                     diff = round(map_sum - data_sum, 6)
                     s_total.loc[data_diff] = data_sum
                     s_total.loc[map_diff + "-1"] = map_sum
-                    s_total.loc[data_diff + "-" + map_diff] = diff
-                    if data_sum != map_sum:
+                    s_total.loc[data_diff + "-" + map_diff] = 0
+                    if abs(diff) != 0:
+                        s_total.loc[data_diff + "-" + map_diff] = diff
                         first_row = df.iloc[0]
                         first_row[diff_column] = map_sum
                         first_row[diff_column + "-1"] = diff
@@ -129,12 +137,6 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
 
     def _modify_attribute_manager(self, map_df, data_df, attribute_manager):
         pass
-
-    def _map_unique_column(self, map_bill_code):
-        return [map_bill_code]
-
-    def _data_unique_column(self, data_bill_code):
-        return [data_bill_code]
 
     def _do_reset_index(self, df, attribute_manager):
         DefaultResetIndex().reset_index(df, attribute_manager)
@@ -152,12 +154,5 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
     def support(self, pay_type):
         return "常用" == pay_type
 
-    def _search(self, map_row, data_df, attribute_manager):
-        map_bill_code = attribute_manager.value(pc.map_bill_code)
-        data_bill_code = attribute_manager.value(pc.data_bill_code)
-        map_unique_column = self._map_unique_column(map_bill_code)
-        data_unique_column = self._data_unique_column(data_bill_code)
-        df = data_df
-        for map_unique_i, map_unique in enumerate(map_unique_column):
-            df = df.loc[df[data_unique_column[map_unique_i]] == map_row[map_unique]]
-        return df
+    def _doing_merger_modify(self, map_df_row, data_df, attribute_manager):
+        pass

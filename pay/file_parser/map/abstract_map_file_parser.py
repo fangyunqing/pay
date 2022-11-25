@@ -18,11 +18,11 @@ class AbstractMapFileParser(FileParser):
 
     def parse_file(self, file_dict, target_file, attribute_manager):
         # 解析数据库对照
-        map_df = self._parse_map(file_dict, attribute_manager)
+        map_df_list = self._parse_map(file_dict, attribute_manager)
         # 解析数据
         data_df = self._parse_data(file_dict, attribute_manager)
         # 合并数据
-        merger_df = self._merger(map_df=map_df, data_df=data_df, attribute_manager=attribute_manager)
+        merger_df = self._merger(map_df_list=map_df_list, data_df=data_df, attribute_manager=attribute_manager)
         # 重建索引
         self._reset_index(merger_df, attribute_manager)
         # excel描述符
@@ -49,11 +49,11 @@ class AbstractMapFileParser(FileParser):
         pass
 
     @PayLog(node="合并数据")
-    def _merger(self, map_df, data_df, attribute_manager):
-        return self._do_merger(map_df, data_df, attribute_manager)
+    def _merger(self, map_df_list, data_df, attribute_manager):
+        return self._do_merger(map_df_list, data_df, attribute_manager)
 
     @abstractmethod
-    def _do_merger(self, map_df, data_df, attribute_manager):
+    def _do_merger(self, map_df_list, data_df, attribute_manager):
         pass
 
     @PayLog(node="重建索引")

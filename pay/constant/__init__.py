@@ -43,6 +43,7 @@ map_client_name = "map_client_name"
 pay_client_name = "client_name"
 water_client_name = "water_client_name"
 tract = "tract"
+no_verification = "no_verification"
 
 # map
 map_file = "map_file"
@@ -96,4 +97,14 @@ across_column = "across_column"
 # 单位
 unit = "unit"
 
-
+# map use
+new_bill_code = "new_bill_code"
+new_material_name = "new_material_name"
+new_money = "new_money"
+new_qty = "new_qty_name"
+new_fee_count = "new_fee_count"
+new_fee = "new_fee"
+new_price = "new_price"
+new_discount = "new_discount"
+new_discount_money = "new_discount_money"
+new_color = "new_color"

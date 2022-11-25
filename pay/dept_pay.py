@@ -6,14 +6,15 @@
 __author__ = 'fyq'
 
 from pay.attribute.attribute import Attribute
+from pay.file_parser.dept.dept_no_verification_file_parser import DeptNoVerificationFileParser
 from pay.interface_pay import InterfacePay
 from pay.path_parser.dept_path_parser import DeptPathParser
 import pay.constant as pc
 import copy
-from pay.file_parser.dept_file_parser import DeptFileParser
-from pay.file_parser.dept_pay_detail_file_parser import DeptPayDetailFileParser
-from pay.file_parser.dept_no_pay_detail_file_Parser import DeptNoPayDetailFileParser
-from pay.file_parser.dept_pre_pay_detail_file_parser import DeptPrePayDetailFileParser
+from pay.file_parser.dept.dept_file_parser import DeptFileParser
+from pay.file_parser.dept.dept_pay_detail_file_parser import DeptPayDetailFileParser
+from pay.file_parser.dept.dept_no_pay_detail_file_Parser import DeptNoPayDetailFileParser
+from pay.file_parser.dept.dept_pre_pay_detail_file_parser import DeptPrePayDetailFileParser
 
 
 class DeptPay(InterfacePay):
@@ -23,7 +24,8 @@ class DeptPay(InterfacePay):
 
     def pay_options(self):
         return ("pay", "应付汇总"), ("prepay", "预付汇总"), \
-               ("pay_detail", "应付-采购明细表"), ("pre_pay_detail", "预付-采购明细表")
+               ("pay_detail", "应付-采购明细表"), ("pre_pay_detail", "预付-采购明细表"), \
+               ("no_pay_detail", "应付-未请款明细说明"), ("no_verification", "预付-未核销说明")
 
     def __init__(self):
         super().__init__()
@@ -80,7 +82,23 @@ class DeptPay(InterfacePay):
                                                     data_type="str"))
         self._attribute_manager_dict["no_pay_detail"] = no_pay_detail_am
 
+        no_pay_detail_am = copy.deepcopy(am)
+        no_pay_detail_am.insert(name=pc.supplier_column,
+                                attribute=Attribute(name=pc.pur_group,
+                                                    value="",
+                                                    text="[解析]采购组织列(单列)",
+                                                    required=True,
+                                                    data_type="str"))
+        no_pay_detail_am.insert(name=pc.use_column,
+                                attribute=Attribute(name=pc.no_verification,
+                                                    value="",
+                                                    text="[解析]未核销原因(多列,逗号分隔)",
+                                                    required=False,
+                                                    data_type="str"))
+        self._attribute_manager_dict["no_verification"] = no_pay_detail_am
+
         self._file_parser = [DeptFileParser(),
                              DeptNoPayDetailFileParser(),
                              DeptPrePayDetailFileParser(),
-                             DeptPayDetailFileParser()]
+                             DeptPayDetailFileParser(),
+                             DeptNoVerificationFileParser()]

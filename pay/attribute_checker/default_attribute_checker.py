@@ -134,6 +134,7 @@ class DefaultAttributeChecker(IAttributeChecker):
             pc.no_pay_reason: _check_no_pay_reason,
             pc.pur_group: _check_pur_group,
             pc.pur_no: _check_pur_no,
-            pc.pre_pay: _check_pre_pay
+            pc.pre_pay: _check_pre_pay,
+            pc.no_verification: _check_no_pay_reason
         }
 

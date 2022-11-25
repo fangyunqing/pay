@@ -21,6 +21,9 @@ from pay.decorator.pay_log import PayLog
 
 class AbstractDefaultFileParser(AbstractFileParser):
 
+    def _ignore(self):
+        return False
+
     def __init__(self):
         # 第一列是否需要合并
         self._first_merge = False
@@ -32,7 +35,7 @@ class AbstractDefaultFileParser(AbstractFileParser):
         self._insert_name = True
 
     @PayLog(node="解析文件")
-    def _parser_file_dict(self, file_dict, attribute_manager):
+    def _parser_file_dict(self, file_dict, attribute_manager, ignore):
         df_dict = {}
         for key in file_dict:
             df_file = []
@@ -42,7 +45,8 @@ class AbstractDefaultFileParser(AbstractFileParser):
                     # 解析文件
                     df = self._parser_file(key=key,
                                            file=file,
-                                           attribute_manager=attribute_manager)
+                                           attribute_manager=attribute_manager,
+                                           ignore=ignore)
                     logger.info("结束解析文件[%s]" % file)
                 except Exception as e:
                     raise Exception("解析文件[%s]失败:[%s]" % (file, str(e)))
@@ -228,7 +232,7 @@ class AbstractDefaultFileParser(AbstractFileParser):
     def _write_sheet_list(self, attribute_manager):
         return [attribute_manager.value(pc.write_sheet)]
 
-    def _parser_file(self, key, file, attribute_manager):
+    def _parser_file(self, key, file, attribute_manager, ignore):
         df = None
         read_sheet = attribute_manager.value(pc.read_sheet)
         df_read_dict = pd.read_excel(io=file,
@@ -242,7 +246,10 @@ class AbstractDefaultFileParser(AbstractFileParser):
                 break
 
         if df is None:
-            raise Exception("[%s]中无法找工作簿[%s]" % (file, read_sheet))
+            if ignore:
+                return None
+            else:
+                raise Exception("[%s]中无法找工作簿[%s]" % (file, read_sheet))
 
         # 列索引转换为字符串
         df.columns = [str(column) for column in df.columns]

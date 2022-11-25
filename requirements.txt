@@ -29,3 +29,4 @@ xlwings==0.27.14
 yarg==0.1.9
 
 pdfplumber~=0.7.5
+PyYAML~=6.0

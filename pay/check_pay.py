@@ -48,6 +48,11 @@ class CheckPay(InterfacePay):
                                    text="[数据文件]分组的列(A,B,C)",
                                    required=True,
                                    data_type="str"))
+        am.add(attribute=Attribute(name=pc.sort_column,
+                                   value="",
+                                   text="[数据文件]排序列(A)",
+                                   required=True,
+                                   data_type="str"))
         am.add(attribute=Attribute(name=pc.write_sheet,
                                    value="",
                                    text="[模板]写入的工作簿名称[工作簿名,行]",

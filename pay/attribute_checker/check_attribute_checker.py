@@ -5,7 +5,6 @@
 
 __author__ = 'fyq'
 
-
 from pay.attribute_checker.attribute_checker import IAttributeChecker
 from pay.attribute_checker.common_checker import CommonChecker
 import pay.constant as pc
@@ -68,11 +67,19 @@ class CheckAttributeChecker(IAttributeChecker):
             """
             CommonChecker.check_check_result(attribute.text, attribute.value)
 
+        def _check_sort_column(attribute):
+            """
+                排序列
+            :return:
+            """
+            attribute.value = CommonChecker.check_excel_map(attribute.text, attribute.value)
+
         return {
             pc.data_file: _check_data_file,
             pc.write_sheet: _check_write_sheet,
             pc.use_column: _check_use_column,
             pc.check_data: _check_check_data,
             pc.group_column: _check_group_column,
-            pc.check_result: _check_check_result
+            pc.check_result: _check_check_result,
+            pc.sort_column: _check_sort_column
         }
