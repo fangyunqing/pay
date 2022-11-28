@@ -7,8 +7,7 @@ __author__ = 'fyq'
 
 
 from pay.attribute_checker.reconciliation_attribute_checker import ReconciliationAttributeChecker
-from pay.file_parser.map import GreenSampleMaterialFeeFileParser, TeBuProductFileParser, TeBuSampleFileParser, \
-    GreenSampleDyeFeeFileParser, GreenSampleFeeFileParser
+from pay.file_parser.map import TeBuProductFileParser, TeBuSampleFileParser, GreenSampleFeeFileParser
 from pay.file_parser.map.reconciliation_file_parser import ReconciliationFileParser
 from pay.interface_pay import InterfacePay
 from pay.attribute.attribute import Attribute
@@ -27,8 +26,8 @@ class ReconciliationPay(InterfacePay):
     def __init__(self):
         super(ReconciliationPay, self).__init__()
         self._attribute_checker_list = [ReconciliationAttributeChecker()]
-        self._file_parser = [ReconciliationFileParser(), GreenSampleMaterialFeeFileParser(), TeBuProductFileParser(),
-                             TeBuSampleFileParser(), GreenSampleDyeFeeFileParser(), GreenSampleFeeFileParser()]
+        self._file_parser = [ReconciliationFileParser(), TeBuProductFileParser(),
+                             TeBuSampleFileParser(), GreenSampleFeeFileParser()]
         self._path_parser = SimplePathParser()
         am = self._attribute_manager_dict["other"]
         am.clear()
@@ -77,6 +76,17 @@ class ReconciliationPay(InterfacePay):
                                    text="对照文件和数据文件之间的列对照(A:A:0,B:B:1)",
                                    required=True,
                                    data_type="str"))
+        am.add(attribute=Attribute(name=pc.mate,
+                                   value="",
+                                   text="品名配置规则",
+                                   required=False,
+                                   data_type="str"))
+        am.add(attribute=Attribute(name=pc.use_color,
+                                   value="",
+                                   text="是否使用颜色",
+                                   required=False,
+                                   data_type="combobox",
+                                   cb_values=["是", "否"]))
         am.add(attribute=Attribute(name=pc.write_sheet,
                                    value="",
                                    text="[模板]写入的工作簿名称[工作簿名,1]",
@@ -97,7 +107,7 @@ class ReconciliationPay(InterfacePay):
                                    text="所属类型",
                                    data_type="combobox",
                                    required=True,
-                                   cb_values=["常用", "绿洲样品", "绿洲样品-材料费", "绿洲样品-染费", "特步量产", "特步样品"]))
+                                   cb_values=["常用", "绿洲样品", "特步量产", "特步样品"]))
 
     def pay_type(self, attribute_name, am):
         return am.value(pc.category)

@@ -8,9 +8,10 @@ __author__ = 'fyq'
 import pandas as pd
 
 
-def pd_read_excel(file_info, file_dict, use_column):
+def pd_read_excel(file_info, file_dict, use_column, data_type):
     """
         读取excel
+    :param data_type:
     :param file_info: 文件名, 工作簿, 列数
     :param file_dict:
     :param use_column:
@@ -26,7 +27,8 @@ def pd_read_excel(file_info, file_dict, use_column):
     df_read_dict = pd.read_excel(io=file_path,
                                  sheet_name=None,
                                  skiprows=int(skip_row),
-                                 header=None)
+                                 header=None,
+                                 dtype=data_type)
     df = None
     for sn in df_read_dict.keys():
         if sn.strip() == sheet_name.strip():

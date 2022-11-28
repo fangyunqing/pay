@@ -12,7 +12,7 @@ import pandas as pd
 
 class DefaultHandleParser(HandleParser):
 
-    def handle_parser(self, file_dict, file_info, use_column_list, attribute_manager):
+    def handle_parser(self, file_dict, file_info, use_column_list, attribute_manager, data_type=None):
         # 文件是否存在
         if file_info[0] not in file_dict:
             raise Exception("对照文件[%s]中未找到" % file_info[0])
@@ -21,7 +21,8 @@ class DefaultHandleParser(HandleParser):
         df_read_dict = pd.read_excel(io=file_name,
                                      sheet_name=None,
                                      skiprows=int(file_info[2]),
-                                     header=None)
+                                     header=None,
+                                     dtype=data_type)
         df = None
         for sheet_name in df_read_dict.keys():
             if sheet_name.strip() == file_info[1].strip():

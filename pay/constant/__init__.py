@@ -108,3 +108,9 @@ new_price = "new_price"
 new_discount = "new_discount"
 new_discount_money = "new_discount_money"
 new_color = "new_color"
+
+# 匹配
+mate = "mate"
+
+# 是否启用颜色
+use_color = "use_color"

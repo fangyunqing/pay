@@ -24,6 +24,7 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
         self.bill_name = ["增值税专普发票数据", 6]
         self.inline_name = ["应收单列表-内部关联方", 3]
         self.path_name = ["路径对应供应商", 1]
+        self.data_name = ["终稿表格版本", 1]
 
     def _do_parse_data(self, file_dict, target_file, attribute_manager):
         sale_df_list = []
@@ -32,6 +33,7 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
         bill_df_list = []
         inline_df_list = []
         path_df_list = []
+        data_df_list = []
         data_df = None
         for key in file_dict.keys():
             if self.recv_dir_name[0] in key:
@@ -85,13 +87,13 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
                                                 header=None)
                         if len(df_list) > 0:
                             path_df_list.extend([df_list[key] for key in df_list.keys()])
-
-        df_list = pd.read_excel(io=target_file,
-                                sheet_name=None,
-                                skiprows=2,
-                                header=None)
-        if len(df_list) > 0:
-            data_df = [df_list[key] for key in df_list.keys()][0]
+                    elif self.data_name[0] in key:
+                        df_list = pd.read_excel(io=file_dict[key],
+                                                sheet_name=None,
+                                                skiprows=self.path_name[1],
+                                                header=None)
+                        if len(df_list) > 0:
+                            data_df = [df_list[key] for key in df_list.keys()][0]
 
         for ind, row in data_df.iterrows():
             # 物料编码
@@ -112,6 +114,7 @@ class AntiDumpingFileParser(AbstractMultipleMapFileParser):
                     if len(df) > 0:
                         transfer = str(df.iloc[0][20])
                         break
+                data_df.loc[ind, 33] = transfer
             else:
                 transfer = str(transfer)
 
