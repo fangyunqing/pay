@@ -93,7 +93,7 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
     def _after_parse_map(self, df, attribute_manager):
         map_bill_code = attribute_manager.value(pc.map_bill_code)
         df[pc.new_bill_code] = df[map_bill_code]
-        return [df, [pc.new_bill_code]]
+        return [[df, [pc.new_bill_code]]]
 
     def _doing_parse_map(self, file_dict, attribute_manager):
         map_file_info = str(attribute_manager.value(pc.map_file)).split(",")
@@ -125,7 +125,14 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
         return data_df
 
     def _after_merger(self, df_list, origin_map_df, attribute_manager):
-        pass
+        super(ReconciliationFileParser, self)._after_merger(df_list, origin_map_df, attribute_manager)
+        if len(df_list) > 0:
+            if df_list[0] is not None:
+                label_list = [pc.new_bill_code]
+                df_list[0].drop(labels=label_list,
+                                axis=1,
+                                inplace=True,
+                                errors="ignore")
 
     @staticmethod
     def _search_data(search_map_df, search_data_df, map_diff, data_diff):

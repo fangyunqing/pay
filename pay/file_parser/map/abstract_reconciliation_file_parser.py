@@ -41,7 +41,6 @@ class AbstractReconciliationFileParser(AbstractMapFileParser):
     def _doing_parse_data(self, file_dict, attribute_manager):
         pass
 
-    @abstractmethod
     def _after_merger(self, df_list, origin_map_df, attribute_manager):
         df_list[0].drop(labels=[pc.new_material_name, pc.new_color],
                         axis=1,

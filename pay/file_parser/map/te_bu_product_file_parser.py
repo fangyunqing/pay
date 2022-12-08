@@ -69,7 +69,7 @@ class TeBuProductFileParser(ReconciliationFileParser):
         return "特步量产" == pay_type
 
     def _after_merger(self, df_list, origin_map_df, attribute_manager):
-        super(TeBuProductFileParser, self)._after_merger()
+        super(TeBuProductFileParser, self)._after_merger(df_list, origin_map_df, attribute_manager)
         if len(df_list) > 0:
             if df_list[0] is not None:
                 label_list = [pc.new_bill_code, pc.new_material_name]
