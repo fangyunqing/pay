@@ -7,7 +7,7 @@ __author__ = 'fyq'
 
 from pay.create_describe_4_excel.create_describe_4_excel import CreateDescribe4Excel
 import pay.constant as pc
-from pay.describe_excel import DescribeExcel
+from pay.entity.describe_excel import TotalDescribeExcel
 
 
 class DefaultCreateDescribe4Excel(CreateDescribe4Excel):
@@ -45,7 +45,7 @@ class DefaultCreateDescribe4Excel(CreateDescribe4Excel):
             else:
                 write_sheet = write_sheet_list[len(write_sheet_list) - 1]
             write_sheet_info = list(write_sheet.split(","))
-            describe_excel = DescribeExcel()
+            describe_excel = TotalDescribeExcel()
             describe_excel.df = df
             describe_excel.row = len(df.index)
             describe_excel.column = len(df.columns)

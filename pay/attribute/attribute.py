@@ -15,7 +15,7 @@ class Attribute:
         :param text: 文本
         :param data_type: 类型
         :param required: 是否必填
-        :param cb_values: 默认值
+        :param cb_values: 组合框的值
         """
         self.name = name
         self.value = value

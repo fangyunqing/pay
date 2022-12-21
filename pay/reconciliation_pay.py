@@ -12,6 +12,7 @@ from pay.file_parser.map.reconciliation_file_parser import ReconciliationFilePar
 from pay.interface_pay import InterfacePay
 from pay.attribute.attribute import Attribute
 import pay.constant as pc
+from pay.attribute import common_attribute
 from pay.path_parser.simple_path_parser import SimplePathParser
 
 
@@ -76,6 +77,7 @@ class ReconciliationPay(InterfacePay):
                                    text="对照文件和数据文件之间的列对照(A:A:0,B:B:1)",
                                    required=True,
                                    data_type="str"))
+        am.add(attribute=common_attribute.check_point_attr)
         am.add(attribute=Attribute(name=pc.mate,
                                    value="",
                                    text="品名配置规则",

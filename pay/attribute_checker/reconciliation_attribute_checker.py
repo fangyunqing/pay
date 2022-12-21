@@ -104,7 +104,7 @@ class ReconciliationAttributeChecker(IAttributeChecker):
 
         def _check_write_total_sheet(attribute):
             """
-                未找到的工作簿
+                统计工作簿
             :return:
             """
             attribute.value = CommonChecker.check_write_sheet(attribute.text, attribute.value)

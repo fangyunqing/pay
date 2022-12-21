@@ -4,3 +4,6 @@
 # @Software: PyCharm
 
 __author__ = 'fyq'
+
+from .singleton import singleton
+from .pay_log import PayLog

@@ -5,6 +5,9 @@
 
 __author__ = 'fyq'
 
+from . import error_string
+from .attr_string import *
+
 # where
 after = "after"
 before = "before"
@@ -114,3 +117,6 @@ mate = "mate"
 
 # 是否启用颜色
 use_color = "use_color"
+
+# 校对基点
+check_point = "check_point"

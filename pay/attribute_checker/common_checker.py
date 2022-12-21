@@ -167,7 +167,11 @@ class CommonChecker:
         val1 = cls.check_excel_map(key, val_list[0])
         val2 = cls.check_excel_map(key, val_list[1])
         val3 = val_list[2]
-        return val1 + ":" + val2 + ":" + val3
+        if len(val_list) == 4:
+            val4 = val_list[3]
+            return val1 + ":" + val2 + ":" + val3 + ":" + val4
+        else:
+            return val1 + ":" + val2 + ":" + val3
 
     @classmethod
     def check_pdf_file(cls, key, val):

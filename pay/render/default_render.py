@@ -24,8 +24,12 @@ class DefaultRender(Render):
                     sheet.select()
                     row_begin = describe_excel.start_row + 1
                     row_end = describe_excel.start_row + describe_excel.row
+                    if row_end < row_begin:
+                        row_end = row_begin
                     column_begin = describe_excel.start_column + 1
                     column_end = describe_excel.start_column + describe_excel.column
+                    if column_end < column_begin:
+                        column_end = column_begin
                     rng = sheet.range((row_begin, column_begin), (row_end, column_end))
                     # 边框
                     rng.api.Borders(7).Weight = 2

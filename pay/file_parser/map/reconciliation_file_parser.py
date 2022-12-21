@@ -5,10 +5,13 @@
 
 __author__ = 'fyq'
 
+import operator
 from functools import reduce
 from itertools import combinations
 
+from pay.entity import SingleExpress, ExpressParam
 from pay.file_parser.map.abstract_reconciliation_file_parser import AbstractReconciliationFileParser
+from pay.file_parser.map.diff_type import DiffTypeManager
 from pay.reset_index.default_reset_index import DefaultResetIndex
 from pay.create_describe_4_excel.reconciliation_create_describe_4_excel import ReconciliationCreateDescribe4Excel
 from pay.write_excel.default_write_excel import DefaultWriteExcel
@@ -163,32 +166,35 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
         df_not_found_list = []
         s_total_list = []
 
-        # for map_unique in search_column_list:
-        #     map_df[map_unique] = map_df[map_unique].astype("str", errors="ignore").apply(remove_zero)
-        #
-        # for data_unique in search_column_list:
-        #     data_df[data_unique] = data_df[data_unique].astype("str", errors="ignore").apply(remove_zero)
-
         # 分组查询
         group = map_df.groupby(by=search_column_list, as_index=False)
+
+        # 基点解析
+        check_point = attribute_manager.value(pc.check_point)
+        point_map_data_split = map_data_list[int(check_point)].split(":")
+        if len(point_map_data_split) == 3:
+            point_map_diff, point_data_diff, point_diff_type = \
+                map_data_list[attribute_manager.value(pc.check_point)].split(":")
+        else:
+            point_map_diff, point_data_diff, point_diff_type, point_handle_exp = \
+                map_data_list[attribute_manager.value(pc.check_point)].split(":")
+        if point_diff_type == "0":
+            raise Exception("error")
+
         for group_key in group.groups.keys():
 
             # 获取分类的数据
-            line = group.groups[group_key]
+            line = group.groups[group_key].values.tolist()
             if isinstance(group_key, (list, tuple)):
                 group_key_list = group_key
             else:
                 group_key_list = [group_key]
 
-            if isinstance(line, (list, tuple)):
-                line_list = [int(ll[0]) for ll in line]
-            else:
-                line_list = [int(line[0])]
+            line_list = [int(ll) for ll in line]
 
-            search_map_df = map_df.loc[line_list]
-
+            search_map_df = map_df.loc[line_list].copy()
             # 查找数据
-            search_data_df = data_df
+            search_data_df = data_df.copy()
             for search_index, search_column in enumerate(search_column_list):
                 search_data_df = search_data_df.loc[search_data_df[search_column] == group_key_list[search_index]]
 
@@ -197,129 +203,160 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
                 df_not_found_list.append(search_map_df)
                 continue
 
-            # 删除已经找到的数据
-            data_df.drop(labels=search_data_df.index, inplace=True)
-
             # 钩子处理
             self._doing_merger_modify(map_df_row=search_map_df,
                                       data_df=search_data_df,
                                       attribute_manager=attribute_manager)
 
-            # 统计
-            s_total = pd.Series(index=search_column_list)
-            s_total_list.append(s_total)
-            for search_index, search_column in enumerate(search_column_list):
-                s_total.loc[search_column] = group_key_list[search_index]
-            # 寻找基点
-            map_diff, data_diff, diff_type = map_data_list[0].split(":")
-            if diff_type != "1":
-                raise Exception("无法寻找到基点")
             find_map_df_list = []
             find_data_df_list = []
 
             while True:
                 find_data, find_map_line_list, find_data_line_list = self._search_data(search_map_df=search_map_df,
                                                                                        search_data_df=search_data_df,
-                                                                                       map_diff=map_diff,
-                                                                                       data_diff=data_diff)
-                find_map_df_list.append(search_map_df.loc[find_map_line_list])
-                find_data_df_list.append(search_data_df.loc[find_data_line_list])
-                search_map_df.drop(list(find_map_line_list), axis=0, inplace=True, errors="ignore")
-                search_data_df.drop(list(find_data_line_list), axis=0, inplace=True, errors="ignore")
-                if not find_data or len(search_map_df) == 0:
+                                                                                       map_diff=point_map_diff,
+                                                                                       data_diff=point_data_diff)
+
+                if len(find_data_line_list) > 0 and len(find_map_line_list) > 0:
+                    find_map_df_list.append(search_map_df.loc[find_map_line_list])
+                    find_data_df_list.append(search_data_df.loc[find_data_line_list])
+                    search_map_df.drop(list(find_map_line_list), axis=0, inplace=True, errors="ignore")
+                    search_data_df.drop(list(find_data_line_list), axis=0, inplace=True, errors="ignore")
+                    data_df.drop(list(find_data_line_list), axis=0, inplace=True, errors="ignore")
+                elif len(find_data_line_list) == 0:
+                    df_not_found_list.append(search_map_df.loc[find_map_line_list])
                     break
+                else:
+                    break
+
+                if not find_data:
+                    break
+
             # 校对
             for find_map_df_index, find_map_df in enumerate(find_map_df_list):
-                find_data_df = find_data_df_list[find_map_df_index]
-                result_df_list.append(find_data_df)
-                for map_data_index, map_data in enumerate(map_data_list):
-                    map_diff, data_diff, diff_type = map_data.split(":")
-                    diff_column = "diff" + str(map_data_index)
-                    # 只比较数据
-                    if diff_type == "0":
-                        find_data_df[diff_column] = np.nan
-                        map_unique_list = [round(val, 6) for val in find_map_df[map_diff].unique().tolist()]
-                        data_unique_list = [round(val, 6) for val in find_data_df[data_diff].unique().tolist()]
-                        s_total.loc[data_diff] = ",".join([str(m) for m in data_unique_list])
-                        s_total.loc[map_diff + "-1"] = ",".join([str(m) for m in map_unique_list])
-                        for map_unique_index, map_unique in enumerate(map_unique_list):
-                            if map_unique != data_unique_list[map_unique_index]:
-                                first_row = find_data_df.iloc[0]
-                                first_row[diff_column] = ",".join([str(m) for m in map_unique_list])
-                                find_data_df.iloc[0] = first_row
-                                break
-                    else:
-                        find_data_df[diff_column] = ""
-                        find_data_df[diff_column + "-1"] = ""
-                        data_sum = round(find_data_df[data_diff].sum(), 6)
-                        map_sum = round(find_map_df[map_diff].sum(), 6)
-                        diff = round(map_sum - data_sum, 6)
-                        s_total.loc[data_diff] = data_sum
-                        s_total.loc[map_diff + "-1"] = map_sum
-                        s_total.loc[data_diff + "-" + map_diff] = 0
-                        if diff != 0:
-                            s_total.loc[data_diff + "-" + map_diff] = diff
-                            first_row = find_data_df.iloc[0]
-                            first_row[diff_column] = map_sum
-                            first_row[diff_column + "-1"] = diff
-                            find_data_df.iloc[0] = first_row
 
-        # for ri, r in map_df.iterrows():
-        #
-        #     df = data_df
-        #     for search_column in search_column_list:
-        #         df = df.loc[df[search_column] == r[search_column]]
-        #
-        #     if len(df.index) == 0:
-        #         df_not_found_list.append(r.to_frame().T)
-        #         continue
-        #
-        #     # 删除已经找到的数据
-        #     data_df.drop(labels=df.index, inplace=True)
-        #
-        #     self._doing_merger_modify(map_df_row=r,
-        #                               data_df=df,
-        #                               attribute_manager=attribute_manager)
-        #
-        #     map_diff_list = []
-        #     data_diff_list = []
-        #
-        #     s_total = pd.Series(index=search_column_list)
-        #     s_total_list.append(s_total)
-        #     for map_unique in search_column_list:
-        #         s_total.loc[map_unique] = r[map_unique]
-        #
-        #     for i, map_data in enumerate(map_data_list):
-        #         map_diff, data_diff, diff_type = map_data.split(":")
-        #         map_diff_list.append(map_diff)
-        #         data_diff_list.append(data_diff)
-        #         diff_column = "diff" + str(i)
-        #
-        #         if diff_type == "0":
-        #             df[diff_column] = ""
-        #             s_diff = df[data_diff] == r[map_diff]
-        #             s_total.loc[data_diff] = ",".join([str(s) for s in df[data_diff].unique().tolist()])
-        #             s_total.loc[map_diff + "-1"] = r[map_diff]
-        #             if not s_diff.all():
-        #                 first_row = df.iloc[0]
-        #                 first_row[diff_column] = r[map_diff]
-        #                 df.iloc[0] = first_row
-        #         else:
-        #             df[diff_column] = ""
-        #             df[diff_column + "-1"] = ""
-        #             data_sum = round(df[data_diff].sum(), 6)
-        #             map_sum = round(r[map_diff], 6)
-        #             diff = round(map_sum - data_sum, 6)
-        #             s_total.loc[data_diff] = data_sum
-        #             s_total.loc[map_diff + "-1"] = map_sum
-        #             s_total.loc[data_diff + "-" + map_diff] = 0
-        #             if abs(diff) != 0:
-        #                 s_total.loc[data_diff + "-" + map_diff] = diff
-        #                 first_row = df.iloc[0]
-        #                 first_row[diff_column] = map_sum
-        #                 first_row[diff_column + "-1"] = diff
-        #                 df.iloc[0] = first_row
-        #     df_list.append(df)
+                # 统计
+                s_total = pd.Series(index=search_column_list, dtype="object")
+                s_total_list.append(s_total)
+                for search_index, search_column in enumerate(search_column_list):
+                    s_total.loc[search_column] = group_key_list[search_index]
+
+                find_data_df = find_data_df_list[find_map_df_index].copy()
+                result_df_list.append(find_data_df)
+
+                # 判断是基点是否相等
+                point_map_sum = round(find_map_df[point_map_diff].sum(), 6)
+                point_data_sum = round(find_data_df[point_data_diff].sum(), 6)
+                point_equal = point_map_sum == point_data_sum
+
+                stat_result_list = []
+                for map_data_index, map_data in enumerate(map_data_list):
+
+                    map_data_split = map_data.split(":")
+                    handle_exp = None
+                    if len(map_data_split) == 3:
+                        map_diff, data_diff, diff_type = map_data_split
+                    else:
+                        map_diff, data_diff, diff_type, handle_exp = map_data_split
+                    # 比较项前缀
+                    diff_column = "diff" + str(map_data_index)
+                    if handle_exp is not None and point_equal:
+                        single_express = SingleExpress(handle_exp)
+                        if single_express.param_one >= len(map_data_list) \
+                                or single_express.param_two >= len(map_data_list):
+                            raise Exception(pc.error_string.map_error_10003)
+
+                        express_param_one = ExpressParam()
+                        express_param_two = ExpressParam()
+                        express_param_one.index = single_express.param_one
+                        express_param_two.index = single_express.param_two
+                        express_param_one.value_list = list(map_data_list[express_param_one.index].split(":"))
+                        express_param_two.value_list = list(map_data_list[express_param_two.index].split(":"))
+
+                        if len(express_param_one.value_list) > 4 or len(express_param_two.value_list) > 4:
+                            raise Exception(pc.error_string.map_error_10002)
+
+                        if express_param_one.value_list[2] == "0" and express_param_two.value_list[2] == "0":
+                            raise Exception(pc.error_string.map_error_10001)
+
+                        total = False
+                        # 比较one统计数据
+                        if express_param_one.value_list[2] == "1":
+                            one_data_sum = find_data_df[express_param_one.value_list[1]].sum()
+                            one_map_sum = find_map_df[express_param_one.value_list[0]].sum()
+                            if one_map_sum != one_data_sum:
+                                total = True
+
+                            zero_data_list = [round(val, 6) for val in
+                                              find_map_df[express_param_two.value_list[0]].unique().tolist()]
+                            zero_map_list = [round(val, 6) for val in
+                                             find_data_df[express_param_two.value_list[1]].unique().tolist()]
+                            if len(zero_data_list) > 1 or len(zero_map_list) > 1:
+                                total = True
+                        else:
+                            one_data_sum = find_data_df[express_param_two.value_list[1]].sum()
+                            one_map_sum = search_map_df[express_param_two.value_list[0]].sum()
+                            if one_map_sum != one_data_sum:
+                                total = True
+
+                            zero_data_list = [round(val, 6) for val in
+                                              find_map_df[express_param_one.value_list[0]].unique().tolist()]
+                            zero_map_list = [round(val, 6) for val in
+                                             find_data_df[express_param_one.value_list[1]].unique().tolist()]
+                            if len(zero_data_list) > 1 or len(zero_map_list) > 1:
+                                total = True
+
+                        stat_result_list.append(
+                            DiffTypeManager().get_diff_type(diff_type).handle(map_df=find_map_df,
+                                                                              data_df=find_data_df,
+                                                                              map_diff=map_diff,
+                                                                              data_diff=data_diff,
+                                                                              diff_column_name="diff" + str(
+                                                                                  map_data_index),
+                                                                              point_equal=point_equal,
+                                                                              single_express=single_express,
+                                                                              express_param_one=express_param_one,
+                                                                              express_param_two=express_param_two,
+                                                                              stat=total,
+                                                                              total_s=s_total))
+                    else:
+                        stat_result_list.append(
+                            DiffTypeManager().get_diff_type(diff_type).handle(map_df=find_map_df,
+                                                                              data_df=find_data_df,
+                                                                              map_diff=map_diff,
+                                                                              data_diff=data_diff,
+                                                                              diff_column_name="diff" + str(
+                                                                                  map_data_index),
+                                                                              point_equal=point_equal,
+                                                                              single_express=None,
+                                                                              express_param_one=None,
+                                                                              express_param_two=None,
+                                                                              stat=True,
+                                                                              total_s=s_total))
+                stat_result_list = [not item for item in filter(lambda item: item is not None, stat_result_list)]
+                if len(find_data_df) > 1 and all(stat_result_list):
+                    for map_data_index, map_data in enumerate(map_data_list):
+                        find_column_name = []
+                        for column_name in find_data_df.columns:
+                            if str(column_name).startswith("diff" + str(map_data_index)):
+                                find_column_name.append(column_name)
+
+                        diff_type = map_data.split(":")[2]
+                        for column_name in find_column_name:
+                            if not find_data_df[column_name].isnull().any():
+                                if diff_type == "0":
+                                    result_list = find_data_df[column_name].unqiue().tolist()
+                                    find_data_df[column_name] = np.nan
+                                    first_s = find_data_df.iloc[0].copy()
+                                    first_s[column_name] = ".".join(result_list)
+                                    find_data_df.iloc[0] = first_s
+                                elif diff_type == "1":
+                                    result_sum = find_data_df[column_name].sum()
+                                    find_data_df[column_name] = np.nan
+                                    first_s = find_data_df.iloc[0].copy()
+                                    first_s[column_name] = result_sum
+                                    find_data_df.iloc[0] = first_s
+
         df_total = None
         if len(s_total_list) > 0:
             df_total = pd.concat(s_total_list, axis=1, ignore_index=False).T

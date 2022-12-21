@@ -106,7 +106,6 @@ class GreenSampleFeeFileParser(ReconciliationFileParser):
         pass
 
     def _after_merger(self, df_list, origin_map_df, attribute_manager):
-        super(GreenSampleFeeFileParser, self)._after_merger(df_list, origin_map_df, attribute_manager)
         if len(df_list) > 0:
             if df_list[0] is not None:
                 result_df = df_list[0]
@@ -151,3 +150,4 @@ class GreenSampleFeeFileParser(ReconciliationFileParser):
                                axis=1,
                                inplace=True,
                                errors="ignore")
+        super(GreenSampleFeeFileParser, self)._after_merger(df_list, origin_map_df, attribute_manager)

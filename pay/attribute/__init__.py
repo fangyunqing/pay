@@ -4,3 +4,8 @@
 # @Software: PyCharm
 
 __author__ = 'fyq'
+
+
+from .attribute import Attribute
+from .attribute_manager import AttributeManager
+from .common_attribute import *

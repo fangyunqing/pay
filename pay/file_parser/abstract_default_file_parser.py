@@ -8,13 +8,13 @@ __author__ = 'fyq'
 import pythoncom
 
 from pay.attribute_checker.common_checker import CommonChecker
+from pay.create_describe_4_excel.default_create_describe_4_excel import DefaultCreateDescribe4Excel
 from pay.file_parser.abstract_file_parser import AbstractFileParser
 from loguru import logger
 import pay.constant as pc
 import numpy as np
 import pandas as pd
 from abc import abstractmethod
-from pay.describe_excel import DescribeExcel
 import xlwings as xl
 from pay.decorator.pay_log import PayLog
 
@@ -91,36 +91,7 @@ class AbstractDefaultFileParser(AbstractFileParser):
 
     @PayLog(node="创建excel描述")
     def _create_describe_4_excel(self, df_parse_list, attribute_manager):
-        write_sheet_list = self._write_sheet_list(attribute_manager)
-        describe_excel_list = []
-        for index, df_parse in enumerate(df_parse_list):
-            # 合计行
-            total_row_list = []
-            for row_index, row in df_parse.iterrows():
-                for cell in row:
-                    if cell == "合计":
-                        total_row_list.append(row_index)
-                        break
-            # 第一_write_sheet_list列
-            first_row_index = []
-            vc = df_parse.iloc[0].value_counts()
-            for v in df_parse.iloc[0].unique():
-                first_row_index.append(vc[v])
-
-            write_sheet = write_sheet_list[index]
-            write_sheet_info = list(write_sheet.split(","))
-            describe_excel = DescribeExcel()
-            describe_excel.df = df_parse
-            describe_excel.row = len(df_parse.index)
-            describe_excel.column = len(df_parse.columns)
-            describe_excel.sheet_name = write_sheet_info[0]
-            describe_excel.start_row = int(write_sheet_info[1])
-            describe_excel.start_column = int(write_sheet_info[2])
-            describe_excel.total_row = total_row_list
-            describe_excel.first_row_index = first_row_index
-            describe_excel.detail = True if index > 0 else False
-            describe_excel_list.append(describe_excel)
-        return describe_excel_list
+        return DefaultCreateDescribe4Excel(df_parse_list, attribute_manager)
 
     @PayLog(node="写入excel")
     def _write_excel(self, describe_excel_list, attribute_manager, target_file):

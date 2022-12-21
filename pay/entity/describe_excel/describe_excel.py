@@ -15,7 +15,3 @@ class DescribeExcel:
         self.sheet_name = None
         self.start_row = None
         self.start_column = None
-        self.total_row = None
-        self.first_row_index = None
-        self.detail = None
-        self.dt_column = None
