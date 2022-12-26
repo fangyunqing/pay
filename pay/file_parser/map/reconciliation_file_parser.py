@@ -143,12 +143,20 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
         s_map = search_map_df[map_diff]
         s_data = search_data_df[data_diff]
 
+        if len(search_data_df) == 1 or len(search_map_df) == 1:
+
+            return False, search_map_df.index.tolist(), search_data_df.index.tolist()
+
         for map_times in range(0, len(search_map_df.index)):
+            if map_times > 9:
+                return False, search_map_df.index.tolist(), search_data_df.index.tolist()
             for combination_map_item in combinations(search_map_df.index, map_times + 1):
                 map_sum = reduce(lambda x, y: x + y,
                                  [s_map[combination_map_element] for combination_map_element in
                                   combination_map_item])
                 for data_times in range(0, len(search_data_df)):
+                    if data_times > 9:
+                        return False, search_map_df.index.tolist(), search_data_df.index.tolist()
                     for combination_data_item in combinations(search_data_df.index, data_times + 1):
                         data_sum = reduce(lambda x, y: x + y,
                                           [s_data[combination_data_element] for combination_data_element in
@@ -333,8 +341,9 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
                                                                               express_param_two=None,
                                                                               stat=True,
                                                                               total_s=s_total))
-                stat_result_list = [not item for item in filter(lambda item: item is not None, stat_result_list)]
-                if len(find_data_df) > 1 and all(stat_result_list):
+                stat_result_list = list(set(
+                    [not item for item in filter(lambda item: item is not None, stat_result_list)]))
+                if len(find_data_df) > 1 and len(stat_result_list) > 1:
                     for map_data_index, map_data in enumerate(map_data_list):
                         find_column_name = []
                         for column_name in find_data_df.columns:
@@ -345,10 +354,10 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
                         for column_name in find_column_name:
                             if not find_data_df[column_name].isnull().any():
                                 if diff_type == "0":
-                                    result_list = find_data_df[column_name].unqiue().tolist()
+                                    result_list = find_data_df[column_name].unique().tolist()
                                     find_data_df[column_name] = np.nan
                                     first_s = find_data_df.iloc[0].copy()
-                                    first_s[column_name] = ".".join(result_list)
+                                    first_s[column_name] = ".".join([str(r) for r in result_list])
                                     find_data_df.iloc[0] = first_s
                                 elif diff_type == "1":
                                     result_sum = find_data_df[column_name].sum()

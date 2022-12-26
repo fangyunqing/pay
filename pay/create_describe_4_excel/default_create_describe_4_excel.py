@@ -8,6 +8,7 @@ __author__ = 'fyq'
 from pay.create_describe_4_excel.create_describe_4_excel import CreateDescribe4Excel
 import pay.constant as pc
 from pay.entity.describe_excel import TotalDescribeExcel
+import pandas as pd
 
 
 class DefaultCreateDescribe4Excel(CreateDescribe4Excel):
@@ -32,7 +33,8 @@ class DefaultCreateDescribe4Excel(CreateDescribe4Excel):
             first_row_index = []
             vc = df["0"].value_counts()
             for v in df["0"].unique():
-                first_row_index.append(vc[v])
+                if not pd.isna(v):
+                    first_row_index.append(vc[v])
 
             # 判断是否是时间类型
             dt_column = []

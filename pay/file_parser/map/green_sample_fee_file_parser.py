@@ -120,28 +120,29 @@ class GreenSampleFeeFileParser(ReconciliationFileParser):
                         qty = find_df[pc.new_qty].sum()
                         money = find_df[pc.new_money].sum()
                         unit = find_df.iloc[0][self.data_unit_column]
+                        fee_money = find_df[pc.new_fee].sum()
                         if unit == "双":
                             if qty >= 20:
                                 result_df.loc[find_df.index.values[0], pc.new_discount] = "20%"
                                 result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(0.2 * money, 2)
+                                    round(0.8 * money + fee_money, 2)
                             else:
                                 result_df.loc[find_df.index.values[0], pc.new_discount] = "100%"
                                 result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(money, 2)
+                                    round(fee_money, 2)
                         elif unit == "YD":
                             if qty <= 5:
                                 result_df.loc[find_df.index.values[0], pc.new_discount] = "100%"
                                 result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(money, 2)
+                                    round(fee_money, 2)
                             elif qty > 10:
                                 result_df.loc[find_df.index.values[0], pc.new_discount] = "30%"
                                 result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(0.3 * money, 2)
+                                    round(0.7 * money + fee_money, 2)
                             else:
                                 result_df.loc[find_df.index.values[0], pc.new_discount] = "50%"
                                 result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(0.5 * money, 2)
+                                    round(0.5 * money + fee_money, 2)
                         else:
                             result_df.loc[find_df.index.values[0], pc.new_discount] = np.nan
 

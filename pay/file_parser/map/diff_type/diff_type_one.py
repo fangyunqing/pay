@@ -63,5 +63,5 @@ class DiffTypeOne(DiffType):
                         else:
                             data_df.loc[data_index, diff_column_name] = data_row[one_index] / zero_data
                     data_df.loc[data_index, diff_column_name + "-1"] = \
-                        data_df.loc[data_index, diff_column_name] - data_row[data_diff]
+                        round(data_df.loc[data_index, diff_column_name] - data_row[data_diff], 6)
                 return False
