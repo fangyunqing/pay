@@ -8,3 +8,4 @@ __author__ = 'fyq'
 
 from .total_describe_excel import TotalDescribeExcel
 from .map_describe_excel import MapDescribeExcel
+from .describe_excel import DescribeExcel

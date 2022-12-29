@@ -8,7 +8,6 @@ __author__ = 'fyq'
 
 from pay.create_describe_4_excel.default_create_describe_4_excel import DefaultCreateDescribe4Excel
 import pay.constant as pc
-from pay.entity.describe_excel.map_describe_excel import MapDescribeExcel
 
 
 class ReconciliationCreateDescribe4Excel(DefaultCreateDescribe4Excel):

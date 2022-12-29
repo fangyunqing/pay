@@ -46,20 +46,19 @@ class GreenSampleFeeFileParser(ReconciliationFileParser):
         df[pc.new_money] = df.apply(handle_money, axis=1)
         df[pc.new_qty] = df.apply(handle_qty, axis=1)
 
-        first_df = df[[pc.new_bill_code, pc.new_material_name, pc.new_color, pc.new_money, pc.new_qty,
+        first_df = df[[pc.new_bill_code, pc.new_money, pc.new_qty,
                        self.map_price_column, pc.new_fee_count, pc.new_fee]] \
-            .groupby(by=[pc.new_bill_code, pc.new_material_name, pc.new_color, self.map_price_column], as_index=False) \
+            .groupby(by=[pc.new_bill_code, self.map_price_column], as_index=False) \
             .sum()
 
-        def second_df(map_df):
-            return map_df[[pc.new_bill_code, pc.new_color, pc.new_money, pc.new_qty,
-                           self.map_price_column, pc.new_fee_count, pc.new_fee]] \
-                .groupby(by=[pc.new_bill_code, pc.new_color, self.map_price_column],
-                         as_index=False) \
-                .sum()
+        # def second_df(map_df):
+        #     return map_df[[pc.new_bill_code, pc.new_color, pc.new_money, pc.new_qty,
+        #                    self.map_price_column, pc.new_fee_count, pc.new_fee]] \
+        #         .groupby(by=[pc.new_bill_code, pc.new_color, self.map_price_column],
+        #                  as_index=False) \
+        #         .sum()
 
-        return [[first_df, [pc.new_bill_code, pc.new_material_name, pc.new_color]],
-                [second_df, [pc.new_bill_code, pc.new_color]]]
+        return [[first_df, [pc.new_bill_code]]]
 
     def _after_parse_data(self, df, attribute_manager):
         df[self.data_price_column].fillna(0, inplace=True)
@@ -95,7 +94,7 @@ class GreenSampleFeeFileParser(ReconciliationFileParser):
         attribute_manager.get(pc.map_data).value = \
             pc.new_qty + ":" + pc.new_qty + ":1," \
             + self.map_price_column + ":" + self.data_price_column + ":0," \
-            + pc.new_money + ":" + pc.new_money + ":1," \
+            + pc.new_money + ":" + pc.new_money + ":1:0*1," \
             + pc.new_fee_count + ":" + pc.new_fee_count + ":1," \
             + pc.new_fee + ":" + pc.new_fee + ":1"
 

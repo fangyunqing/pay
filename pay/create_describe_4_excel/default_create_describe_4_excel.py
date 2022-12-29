@@ -7,7 +7,7 @@ __author__ = 'fyq'
 
 from pay.create_describe_4_excel.create_describe_4_excel import CreateDescribe4Excel
 import pay.constant as pc
-from pay.entity.describe_excel import TotalDescribeExcel
+from pay.create_describe_4_excel.describe_excel import TotalDescribeExcel
 import pandas as pd
 
 

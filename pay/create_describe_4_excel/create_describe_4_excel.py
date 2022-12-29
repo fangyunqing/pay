@@ -14,6 +14,4 @@ class CreateDescribe4Excel(metaclass=ABCMeta):
     def create_describe_4_excel(self, df_list, attribute_manager):
         pass
 
-    @abstractmethod
-    def write_sheet_list(self, attribute_manager):
-        pass
+

@@ -266,8 +266,6 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
                         map_diff, data_diff, diff_type = map_data_split
                     else:
                         map_diff, data_diff, diff_type, handle_exp = map_data_split
-                    # 比较项前缀
-                    diff_column = "diff" + str(map_data_index)
                     if handle_exp is not None and point_equal:
                         single_express = SingleExpress(handle_exp)
                         if single_express.param_one >= len(map_data_list) \

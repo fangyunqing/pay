@@ -5,10 +5,14 @@
 
 __author__ = 'fyq'
 
-from pay.entity.describe_excel.describe_excel import DescribeExcel
+from pay.create_describe_4_excel.describe_excel.describe_excel import DescribeExcel
 
 
 class TotalDescribeExcel(DescribeExcel):
+
+    """
+        统计功能
+    """
 
     def __init__(self):
         super(TotalDescribeExcel, self).__init__()

@@ -8,7 +8,7 @@ __author__ = 'fyq'
 import pandas as pd
 
 
-def pd_read_excel(file_info, file_dict, use_column, data_type):
+def pd_read_excel(file_info, file_dict, use_column, data_type=None):
     """
         读取excel
     :param data_type:

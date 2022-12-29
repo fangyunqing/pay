@@ -6,10 +6,14 @@
 __author__ = 'fyq'
 
 
-from pay.entity.describe_excel.describe_excel import DescribeExcel
+from pay.create_describe_4_excel.describe_excel.describe_excel import DescribeExcel
 
 
 class MapDescribeExcel(DescribeExcel):
+
+    """
+        对账的生成
+    """
 
     def __init__(self):
         super(MapDescribeExcel, self).__init__()
