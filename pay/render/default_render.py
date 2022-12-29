@@ -60,5 +60,5 @@ class DefaultRender(Render):
             app.kill()
             pythoncom.CoUninitialize()
 
-    def _other_render(self, sheet, attribute_manager):
+    def _other_render(self, describe_excel, sheet, attribute_manager):
         pass
