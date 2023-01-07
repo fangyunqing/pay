@@ -10,14 +10,12 @@ from abc import abstractmethod
 from pay.create_describe_4_excel.create_describe_4_excel import CreateDescribe4Excel
 
 
-
 class AbstractCreateDescribe4Excel(CreateDescribe4Excel):
 
     def create_describe_4_excel(self, df_list, attribute_manager):
         write_sheet_list = self.write_sheet_list(attribute_manager)
         describe_excel_list = []
         for index, df in enumerate(df_list):
-
             write_sheet = self._get_write_sheet(index, write_sheet_list)
             write_sheet_info = list(write_sheet.split(","))
             describe_excel = self.new_describe_excel()

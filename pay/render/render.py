@@ -5,7 +5,6 @@
 
 __author__ = 'fyq'
 
-
 from abc import ABCMeta, abstractmethod
 
 

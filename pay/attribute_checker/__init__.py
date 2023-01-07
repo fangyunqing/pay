@@ -7,3 +7,4 @@ __author__ = 'fyq'
 
 from .pdf_attribute_checker import PDFAttributeChecker
 from .check_attribute_checker import CheckAttributeChecker
+from .common_checker import CommonChecker

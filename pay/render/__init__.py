@@ -4,3 +4,6 @@
 # @Software: PyCharm
 
 __author__ = 'fyq'
+
+from .total_render import TotalRender
+from .default_render import DefaultRender

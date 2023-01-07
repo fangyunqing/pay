@@ -47,11 +47,20 @@ class DefaultRender(Render):
                     rng.font.size = 12
                     rng.font.name = "微软雅黑"
                     # 千分位
-                    for c in range(column_begin, column_end + 1):
-                        if str(c-1) not in describe_excel.dt_column:
-                            sheet.range((row_begin, c), (row_end, c)).number_format = '[=0]"";###,###.00'
-
-                    self._other_render(sheet=sheet, attribute_manager=attribute_manager)
+                    for index, value in describe_excel.df.dtypes().items():
+                        if "int" in value.name or "float" in value.name:
+                            column_index = int(index + 1)
+                            sheet.range((row_begin, column_index), (row_end, column_index)).number_format = \
+                                '[=0]"";###,###.00'
+                    self._other_render(excel_app=app,
+                                       describe_excel=describe_excel,
+                                       describe_index=desc_index,
+                                       sheet=sheet,
+                                       attribute_manager=attribute_manager,
+                                       row_begin=row_begin,
+                                       row_end=row_end,
+                                       column_begin=column_begin,
+                                       column_end=column_end)
                 finally:
                     wb.save()
                     wb.close()
@@ -60,5 +69,5 @@ class DefaultRender(Render):
             app.kill()
             pythoncom.CoUninitialize()
 
-    def _other_render(self, describe_excel, sheet, attribute_manager):
+    def _other_render(self, excel_app, describe_excel, describe_index, sheet, attribute_manager, row_begin, row_end, column_begin, column_end):
         pass
