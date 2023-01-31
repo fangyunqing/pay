@@ -14,6 +14,9 @@ import pay.constant as pc
 
 class MultipleMapPay(InterfacePay):
 
+    def order(self) -> int:
+        return 7
+
     def pay_name(self):
         return "multiple_map", "多文件对照"
 

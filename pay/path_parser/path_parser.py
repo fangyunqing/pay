@@ -7,12 +7,14 @@ __author__ = 'fyq'
 
 import time
 from abc import ABCMeta, abstractmethod
+from typing import Optional, Tuple, Dict, Iterable
+
 
 
 class PathParser(metaclass=ABCMeta):
 
     @classmethod
-    def _is_ignore_file(cls, file):
+    def _is_ignore_file(cls, file) -> bool:
         """
             是否是需要忽略的文件
                 开头 ~ . ..
@@ -23,7 +25,7 @@ class PathParser(metaclass=ABCMeta):
         return file.startswith("~") or file in (".", "..") or not file.endswith((".xlsx", ".xls"))
 
     @classmethod
-    def _get_date(cls, prefix_list):
+    def _get_date(cls, prefix_list) -> Optional[str]:
         for prefix in prefix_list:
             try:
                 time.strptime(prefix, "%Y%m")
@@ -32,5 +34,5 @@ class PathParser(metaclass=ABCMeta):
                 continue
 
     @abstractmethod
-    def parse_path(self, path, date_length):
+    def parse_path(self, path, date_length) -> Tuple[Optional[str], Dict[str, Iterable], Optional[str]]:
         pass

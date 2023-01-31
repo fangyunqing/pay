@@ -73,7 +73,7 @@ class WeiLinPdfHandleParser(HandleParser):
                 find = False
                 for line in line_list:
                     if find:
-                        if not line.startswith(exclude_line_list):
+                        if not any([el in line for el in exclude_line_list]):
                             text_list.append(line)
                     elif line.startswith(skip_text):
                         find = True

@@ -12,7 +12,6 @@ from pay.decorator.pay_log import PayLog
 
 class SimplePathParser(PathParser):
 
-    @PayLog(node="解析路径")
     def parse_path(self, path, date_length):
         file_dict = {}
         for file in os.listdir(path):

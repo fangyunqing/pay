@@ -15,6 +15,9 @@ import pay.constant as pc
 
 class PdfPay(InterfacePay):
 
+    def order(self) -> int:
+        return 6
+
     def pay_name(self):
         return "PDF", "PDF"
 

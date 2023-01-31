@@ -6,15 +6,18 @@
 __author__ = 'fyq'
 
 from abc import ABCMeta, abstractmethod
+from typing import Tuple, Optional, Dict, Iterable
+
+from pay.attribute import AttributeManager
 
 
 class FileParser(metaclass=ABCMeta):
 
     @abstractmethod
     def parse_file(self,
-                   file_dict,
-                   target_file,
-                   attribute_manager):
+                   file_dict: Tuple[Optional[str], Dict[str, Iterable], Optional[str]],
+                   target_file: Optional[str],
+                   attribute_manager: AttributeManager) -> None:
         """
         :param file_dict: name:file-list
         :param target_file: 目标文件
@@ -24,5 +27,5 @@ class FileParser(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def support(self, pay_type):
+    def support(self, pay_type) -> bool:
         pass

@@ -13,6 +13,9 @@ from pay.file_parser.supplier_file_parser import SupplierFileParser
 
 class SupplierPay(InterfacePay):
 
+    def order(self) -> int:
+        return 1
+
     def pay_options(self):
         return ("pay", "应付汇总"), ("prepay", "预付汇总")
 

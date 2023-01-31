@@ -4,3 +4,17 @@
 # @Software: PyCharm
 
 __author__ = 'fyq'
+
+from pay.interface_pay import pay_type
+from pay.pay_manager import PayManager
+from pay.ar_day_pay import ARDayPay
+from pay.check_pay import CheckPay
+from pay.dept_pay import DeptPay
+from pay.group_pay import GroupPay
+from pay.multiple_map_pay import MultipleMapPay
+from pay.pdf_py import PdfPay
+from pay.reconciliation_pay import ReconciliationPay
+from pay.supplier_pay import SupplierPay
+from pay.invoice_pay import InvoicePay
+
+__all__ = [pay_type, PayManager]

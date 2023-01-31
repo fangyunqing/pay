@@ -16,6 +16,9 @@ from pay.path_parser.simple_path_parser import SimplePathParser
 
 class ARDayPay(InterfacePay):
 
+    def order(self) -> int:
+        return 4
+
     def pay_name(self):
         return "ap_day", "应收每日"
 

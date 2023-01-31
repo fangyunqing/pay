@@ -6,6 +6,7 @@
 __author__ = 'fyq'
 
 from abc import ABCMeta, abstractmethod
+from typing import List, Tuple
 
 from pay.attribute_checker.default_attribute_checker import DefaultAttributeChecker
 from pay.attribute.attribute import Attribute
@@ -46,6 +47,13 @@ class InterfacePay(metaclass=ABCMeta):
         self._file_copy = DefaultFileCopy()
         # 文件解析
         self._file_parser = None
+
+    def __init_subclass__(cls, **kwargs):
+        if cls.__dict__.get("name", None) is None:
+            cls.name: str = cls.__name__
+        if cls.name == "InterfacePay" or cls.name.startswith(("Abstract", "abstract")):
+            return
+        pay_type.append(cls)
 
     def _create_attribute_list(self):
         am = self._attribute_manager_dict["other"]
@@ -95,16 +103,27 @@ class InterfacePay(metaclass=ABCMeta):
                          data_type="str",
                          required=False))
 
+    @PayLog(node="解析路径")
+    def _parse_path(self, path, date_length):
+        return self._path_parser.parse_path(path=path, date_length=date_length)
+
+    @PayLog(node="文件拷贝")
+    def _copy_file(self, template_file, prefix_date, path, target=None):
+        return self._file_copy.copy_file(template_file=template_file,
+                                         path=path,
+                                         target=target,
+                                         prefix_date=prefix_date)
+
     def parse(self, attribute_data, path, template_file):
 
         logger.info("开始处理模块[%s]" % self.pay_name()[1])
         # 解析路径
-        prefix_date, file_dict, target = self._path_parser.parse_path(path=path, date_length=6)
+        prefix_date, file_dict, target = self._parse_path(path=path, date_length=6)
         # 拷贝模板文件
-        target_file = self._file_copy.copy_file(template_file=template_file,
-                                                path=path,
-                                                target=target,
-                                                prefix_date=prefix_date)
+        target_file = self._copy_file(template_file=template_file,
+                                      path=path,
+                                      target=target,
+                                      prefix_date=prefix_date)
 
         for attribute_name in attribute_data.keys():
             try:
@@ -166,12 +185,19 @@ class InterfacePay(metaclass=ABCMeta):
                 return po[0]
 
     @abstractmethod
-    def pay_name(self):
+    def pay_name(self) -> Tuple[str, str]:
         pass
 
     @abstractmethod
-    def pay_options(self):
+    def pay_options(self) -> Tuple[Tuple[str, str], ...]:
+        pass
+
+    @abstractmethod
+    def order(self) -> int:
         pass
 
     def pay_type(self, attribute_name, am):
         return self.pay_name()[0] + "." + self.map_pay_option(attribute_name)
+
+
+pay_type: List[type(InterfacePay)] = []

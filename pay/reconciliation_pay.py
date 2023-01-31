@@ -18,6 +18,9 @@ from pay.path_parser.simple_path_parser import SimplePathParser
 
 class ReconciliationPay(InterfacePay):
 
+    def order(self) -> int:
+        return 5
+
     def pay_name(self):
         return "reconciliation", "应收对账"
 

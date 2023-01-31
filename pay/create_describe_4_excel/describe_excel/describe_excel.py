@@ -5,29 +5,32 @@
 
 __author__ = 'fyq'
 
+from dataclasses import dataclass
 
+from pandas import DataFrame
+
+
+@dataclass
 class DescribeExcel:
 
     """
         描述excel信息 用于写入excel 和 渲染excel
+        df DataFrame对象
+        row 行数
+        column 列数
+        sheet_name 工作簿名称
+        start_row 起始行
+        start_column 结束行
     """
+    df: DataFrame
 
-    def __init__(self):
+    row: int
 
-        # DataFrame
-        self.df = None
+    column: int
 
-        # DataFrame的行数
-        self.row = None
+    sheet_name: str
 
-        # DataFrame的列数
-        self.column = None
+    start_row: int
 
-        # 工作簿的名称
-        self.sheet_name = None
+    start_column: int
 
-        # 工作簿的起始行 0开始
-        self.start_row = None
-
-        # 工作簿的起始列 0开始
-        self.start_column = None

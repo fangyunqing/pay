@@ -15,7 +15,6 @@ class DefaultPathParser(PathParser):
     """
     默认路径解析器, 只会解析1级和2级路径
     """
-    @PayLog(node="解析路径")
     def parse_path(self, path, date_length):
         """
             1. 解析路径形成 file_dict

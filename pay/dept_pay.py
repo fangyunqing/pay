@@ -19,6 +19,9 @@ from pay.file_parser.dept.dept_pre_pay_detail_file_parser import DeptPrePayDetai
 
 class DeptPay(InterfacePay):
 
+    def order(self) -> int:
+        return 3
+
     def pay_name(self):
         return "dept", "事业部"
 

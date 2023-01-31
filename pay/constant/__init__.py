@@ -6,7 +6,7 @@
 __author__ = 'fyq'
 
 from . import error_string
-from .attr_string import *
+from . import attr_string
 
 # where
 after = "after"

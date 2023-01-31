@@ -107,6 +107,7 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
                                                      use_column_list=map_use_column_list,
                                                      attribute_manager=attribute_manager,
                                                      data_type={int(map_bill_code): str})
+        map_df = map_df[map_df[map_bill_code].notna()]
         map_df[map_bill_code] = map_df[map_bill_code].apply(lambda x: str(x).strip().replace("'", ""))
         return map_df
 
@@ -124,6 +125,7 @@ class ReconciliationFileParser(AbstractReconciliationFileParser):
                                                       use_column_list=data_use_column_list,
                                                       attribute_manager=attribute_manager,
                                                       data_type={int(data_bill_code): str})
+        data_df = data_df[data_df[data_bill_code].notna()]
         data_df[data_bill_code] = data_df[data_bill_code].apply(lambda x: str(x).strip().replace("'", ""))
         return data_df
 

@@ -116,34 +116,35 @@ class GreenSampleFeeFileParser(ReconciliationFileParser):
                                         & (result_df[self.data_material_name_column] == group_key[1])
                                         & (result_df[self.data_unit_column] == group_key[2])]
                     if len(find_df) > 0:
-                        qty = find_df[pc.new_qty].sum()
-                        money = find_df[pc.new_money].sum()
-                        unit = find_df.iloc[0][self.data_unit_column]
-                        fee_money = find_df[pc.new_fee].sum()
-                        if unit == "双":
-                            if qty >= 20:
-                                result_df.loc[find_df.index.values[0], pc.new_discount] = "20%"
-                                result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(0.8 * money + fee_money, 2)
+                        for find_index, find_row in find_df.iterrows():
+                            qty = find_df[pc.new_qty].sum()
+                            money = find_row[pc.new_money]
+                            unit = find_row[self.data_unit_column]
+                            fee_money = find_row[pc.new_fee]
+                            if unit == "双":
+                                if qty >= 20:
+                                    result_df.loc[find_index, pc.new_discount] = "20%"
+                                    result_df.loc[find_index, pc.new_discount_money] = \
+                                        round(0.8 * money + fee_money, 2)
+                                else:
+                                    result_df.loc[find_index, pc.new_discount] = "100%"
+                                    result_df.loc[find_index, pc.new_discount_money] = \
+                                        round(fee_money, 2)
+                            elif unit == "YD":
+                                if qty <= 5:
+                                    result_df.loc[find_index, pc.new_discount] = "100%"
+                                    result_df.loc[find_index, pc.new_discount_money] = \
+                                        round(fee_money, 2)
+                                elif qty > 10:
+                                    result_df.loc[find_index, pc.new_discount] = "30%"
+                                    result_df.loc[find_index, pc.new_discount_money] = \
+                                        round(0.7 * money + fee_money, 2)
+                                else:
+                                    result_df.loc[find_index, pc.new_discount] = "50%"
+                                    result_df.loc[find_index, pc.new_discount_money] = \
+                                        round(0.5 * money + fee_money, 2)
                             else:
-                                result_df.loc[find_df.index.values[0], pc.new_discount] = "100%"
-                                result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(fee_money, 2)
-                        elif unit == "YD":
-                            if qty <= 5:
-                                result_df.loc[find_df.index.values[0], pc.new_discount] = "100%"
-                                result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(fee_money, 2)
-                            elif qty > 10:
-                                result_df.loc[find_df.index.values[0], pc.new_discount] = "30%"
-                                result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(0.7 * money + fee_money, 2)
-                            else:
-                                result_df.loc[find_df.index.values[0], pc.new_discount] = "50%"
-                                result_df.loc[find_df.index.values[0], pc.new_discount_money] = \
-                                    round(0.5 * money + fee_money, 2)
-                        else:
-                            result_df.loc[find_df.index.values[0], pc.new_discount] = np.nan
+                                result_df.loc[find_index, pc.new_discount] = np.nan
 
                 label_list = [pc.new_bill_code, pc.new_money, pc.new_qty, pc.new_fee_count, pc.new_fee]
                 result_df.drop(labels=label_list,

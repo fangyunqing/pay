@@ -19,7 +19,6 @@ class DefaultFileCopy(FileCopy):
     默认的文件拷贝
     """
 
-    @PayLog(node="文件拷贝")
     def copy_file(self, template_file, prefix_date, path, target=None):
 
         """

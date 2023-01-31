@@ -60,9 +60,6 @@ class AbstractReconciliationFileParser(AbstractMapFileParser):
         self._do_parse_material_name(df, attribute_manager, is_map=True)
         self._do_parse_color(df, attribute_manager, is_map=True)
         df_info_list = self._after_parse_map(df=df, attribute_manager=attribute_manager)
-        for df_info in df_info_list:
-            if not callable(df_info[0]):
-                df_info[0].dropna(inplace=True)
         return df_info_list, df
 
     def _do_parse_data(self, file_dict, attribute_manager):

@@ -7,3 +7,4 @@ __author__ = 'fyq'
 
 from .default_path_parser import DefaultPathParser
 from .deep_path_parser import DeepPathParser
+from .invoice_path_parser import InvoicePathParser

@@ -15,6 +15,9 @@ from pay.path_parser.simple_path_parser import SimplePathParser
 
 class CheckPay(InterfacePay):
 
+    def order(self) -> int:
+        return 8
+
     def pay_name(self):
         return "check", "校对"
 

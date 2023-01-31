@@ -13,6 +13,9 @@ from pay.file_parser.group_file_parser import GroupFileParser
 
 class GroupPay(InterfacePay):
 
+    def order(self) -> int:
+        return 2
+
     def pay_options(self):
         return ("pay", "应付汇总"), ("prepay", "预付汇总"), ("no-pay", "应付未付款")
 

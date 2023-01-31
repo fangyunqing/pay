@@ -6,7 +6,9 @@
 __author__ = 'fyq'
 
 from abc import ABCMeta, abstractmethod
+from typing import Dict, Callable
 
+from pay.attribute import Attribute
 from pay.attribute_checker.common_checker import CommonChecker
 
 
@@ -20,5 +22,5 @@ class IAttributeChecker(metaclass=ABCMeta):
                 check_map[attr.name](attr)
 
     @abstractmethod
-    def create_check_map(self):
+    def create_check_map(self) -> Dict[str, Callable[[Attribute], None]]:
         pass

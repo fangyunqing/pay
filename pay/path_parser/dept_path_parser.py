@@ -13,7 +13,6 @@ from loguru import logger
 
 class DeptPathParser(PathParser):
 
-    @PayLog(node="解析路径")
     def parse_path(self, path, date_length):
         dept_name = os.path.basename(path)
         file_list = []
