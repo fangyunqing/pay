@@ -5,18 +5,19 @@
 
 __author__ = 'fyq'
 
-from pay.create_describe_4_excel.describe_excel.describe_excel import DescribeExcel
+from dataclasses import dataclass
+
+from pay.create_describe_4_excel.describe_excel import DescribeExcel
+import typing
 
 
+@dataclass
 class TotalDescribeExcel(DescribeExcel):
+    """
+       total_row_list 合计行
+       first_column_merger_list 第一行合并节点
 
     """
-        统计功能
-    """
+    total_row_list: typing.List[int]
 
-    def __init__(self):
-        super(TotalDescribeExcel, self).__init__()
-        self.total_row = None
-        self.first_row_index = None
-        self.detail = None
-        self.dt_column = None
+    first_column_merger_list: typing.List[int]

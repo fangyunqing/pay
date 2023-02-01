@@ -16,21 +16,24 @@ class DescribeExcel:
     """
         描述excel信息 用于写入excel 和 渲染excel
         df DataFrame对象
-        row 行数
-        column 列数
+        row_count 行数
+        column_count 列数
         sheet_name 工作簿名称
         start_row 起始行
         start_column 结束行
+        detail 是否详情
     """
     df: DataFrame
 
-    row: int
+    row_count: int
 
-    column: int
+    column_count: int
 
     sheet_name: str
 
     start_row: int
 
     start_column: int
+
+    detail: bool
 
