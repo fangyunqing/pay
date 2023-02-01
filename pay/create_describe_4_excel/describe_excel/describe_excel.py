@@ -5,7 +5,7 @@
 
 __author__ = 'fyq'
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from pandas import DataFrame
 
@@ -23,17 +23,17 @@ class DescribeExcel:
         start_column 结束行
         detail 是否详情
     """
-    df: DataFrame
+    df: DataFrame = field(default=None)
 
-    row_count: int
+    row_count: int = field(default=None)
 
-    column_count: int
+    column_count: int = field(default=None)
 
-    sheet_name: str
+    sheet_name: str = field(default=None)
 
-    start_row: int
+    start_row: int = field(default=None)
 
-    start_column: int
+    start_column: int = field(default=None)
 
-    detail: bool
+    detail: bool = field(default=None)
 

@@ -5,7 +5,7 @@
 
 __author__ = 'fyq'
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from pay.create_describe_4_excel.describe_excel import DescribeExcel
 import typing
@@ -18,6 +18,6 @@ class TotalDescribeExcel(DescribeExcel):
        first_column_merger_list 第一行合并节点
 
     """
-    total_row_list: typing.List[int]
+    total_row_list: typing.List[int] = field(default=None)
 
-    first_column_merger_list: typing.List[int]
+    first_column_merger_list: typing.List[int] = field(default=None)

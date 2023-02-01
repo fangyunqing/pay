@@ -7,36 +7,48 @@ __author__ = 'fyq'
 
 from abc import abstractmethod
 
+import typing
+from pandas import DataFrame
+
+from pay.attribute import AttributeManager
 from pay.create_describe_4_excel.create_describe_4_excel import CreateDescribe4Excel
 from pay.create_describe_4_excel.describe_excel import DescribeExcel
 
 
 class AbstractCreateDescribe4Excel(CreateDescribe4Excel):
 
-    def create_describe_4_excel(self, df_list, attribute_manager):
+    def create_describe_4_excel(self, df_list: typing.List[DataFrame],
+                                attribute_manager: AttributeManager) -> typing.List[DescribeExcel]:
         write_sheet_list = self.write_sheet_list(attribute_manager)
         describe_excel_list = []
         for index, df in enumerate(df_list):
+            if df is None:
+                continue
+            de = self.new_describe_excel()
+            write_sheet = write_sheet_list[index] if len(write_sheet_list) - 1 >= index else write_sheet_list[
+                len(write_sheet_list) - 1]
+            self._do_create_describe_4_excel(de=de,
+                                             df=df,
+                                             write_sheet=write_sheet,
+                                             index=index,
+                                             attribute_manager=attribute_manager)
+            describe_excel_list.append(de)
 
-            write_sheet = self._get_write_sheet(index, write_sheet_list)
-            write_sheet_info = list(write_sheet.split(","))
-            describe_excel = DescribeExcel()
-            describe_excel.df = df
-            describe_excel.row = len(df.index)
-            describe_excel.column = len(df.columns)
-            describe_excel.sheet_name = write_sheet_info[0]
-            describe_excel.start_row = int(write_sheet_info[1])
-            describe_excel.start_column = int(write_sheet_info[2])
-
-            describe_excel_list.append(describe_excel)
+        return describe_excel_list
 
     @abstractmethod
-    def write_sheet_list(self, attribute_manager):
+    def write_sheet_list(self, attribute_manager: AttributeManager):
         pass
 
-    @staticmethod
-    def _get_write_sheet(index, write_sheet_list):
-        if len(write_sheet_list) - 1 >= index:
-            return write_sheet_list[index]
-        else:
-            return write_sheet_list[len(write_sheet_list) - 1]
+    @abstractmethod
+    def new_describe_excel(self) -> DescribeExcel:
+        pass
+
+    @abstractmethod
+    def _do_create_describe_4_excel(self,
+                                    de: DescribeExcel,
+                                    df: DataFrame,
+                                    write_sheet: str,
+                                    index: int,
+                                    attribute_manager: AttributeManager) -> None:
+        pass

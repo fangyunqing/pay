@@ -5,59 +5,32 @@
 
 __author__ = 'fyq'
 
-from pay.create_describe_4_excel.create_describe_4_excel import CreateDescribe4Excel
+import typing
+
+from pandas import DataFrame
+
+from pay.attribute import AttributeManager
+from pay.create_describe_4_excel.abstract_create_describe_4_excel import AbstractCreateDescribe4Excel
 import pay.constant as pc
-from pay.create_describe_4_excel.describe_excel import TotalDescribeExcel
+from pay.create_describe_4_excel.describe_excel import DescribeExcel
 import pandas as pd
 
 
-class DefaultCreateDescribe4Excel(CreateDescribe4Excel):
+class DefaultCreateDescribe4Excel(AbstractCreateDescribe4Excel):
+
+    def _do_create_describe_4_excel(self, de: DescribeExcel, df: DataFrame, write_sheet: str, index: int,
+                                    attribute_manager: AttributeManager) -> None:
+        write_sheet_info = list(write_sheet.split(","))
+        de.df = df
+        de.row_count = len(df.index)
+        de.column_count = len(df.columns)
+        de.sheet_name = write_sheet_info[0]
+        de.start_row = int(write_sheet_info[1])
+        de.start_column = int(write_sheet_info[2])
+        de.detail = True if index > 0 else False
+
+    def new_describe_excel(self) -> DescribeExcel:
+        return DescribeExcel()
 
     def write_sheet_list(self, attribute_manager):
         return [attribute_manager.value(pc.write_sheet)]
-
-    def create_describe_4_excel(self, df_list, attribute_manager):
-        write_sheet_list = self.write_sheet_list(attribute_manager)
-        describe_excel_list = []
-        for index, df in enumerate(df_list):
-            if df is None:
-                continue
-            # 合计行
-            total_row_list = []
-            for row_index, row in df.iterrows():
-                for cell in row:
-                    if cell == "合计":
-                        total_row_list.append(row_index)
-                        break
-            # 第一列
-            first_row_index = []
-            vc = df["0"].value_counts()
-            for v in df["0"].unique():
-                if not pd.isna(v):
-                    first_row_index.append(vc[v])
-
-            # 判断是否是时间类型
-            dt_column = []
-            for i, v in df.dtypes.items():
-                if "time" in v.name:
-                    dt_column.append(i)
-
-            if len(write_sheet_list) - 1 >= index:
-                write_sheet = write_sheet_list[index]
-            else:
-                write_sheet = write_sheet_list[len(write_sheet_list) - 1]
-            write_sheet_info = list(write_sheet.split(","))
-            describe_excel = TotalDescribeExcel()
-            describe_excel.df = df
-            describe_excel.row = len(df.index)
-            describe_excel.column = len(df.columns)
-            describe_excel.sheet_name = write_sheet_info[0]
-            describe_excel.start_row = int(write_sheet_info[1])
-            describe_excel.start_column = int(write_sheet_info[2])
-            describe_excel.total_row = total_row_list
-            describe_excel.first_row_index = first_row_index
-            describe_excel.detail = True if index > 0 else False
-            describe_excel.dt_column = dt_column
-            describe_excel_list.append(describe_excel)
-
-        return describe_excel_list
