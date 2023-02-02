@@ -5,21 +5,23 @@
 
 __author__ = 'fyq'
 
-from pay.file_parser.abstract_default_file_parser import AbstractDefaultFileParser
+from typing import Dict, Iterable, List
+
+from pandas import DataFrame
+
+from pay.attribute import AttributeManager
 import pay.constant as pc
 import pandas as pd
 
+from pay.file_parser.payable.abstract_common_payable_file_parser import AbstractCommonPayableFileParser
 
-class SupplierFileParser(AbstractDefaultFileParser):
 
-    def support(self, pay_type):
+class SupplierFileParser(AbstractCommonPayableFileParser):
+
+    def _insert_name(self) -> bool:
         return True
 
-    def _group_column(self, attribute_manager):
-        return [attribute_manager.value(pc.supplier_column),
-                attribute_manager.value(pc.type_column)]
-
-    def _do_parse_df_dict(self, df_dict, attribute_manager):
+    def _do_parse_df(self, df_dict: Dict[str, DataFrame], attribute_manager: AttributeManager) -> List[DataFrame]:
         type_column = attribute_manager.value(pc.type_column)
         supplier_column = attribute_manager.value(pc.supplier_column)
         df_list = []
@@ -71,8 +73,16 @@ class SupplierFileParser(AbstractDefaultFileParser):
         df_total = pd.concat([df_top_total_total, df_top_total, pd.concat(df_total_list)])
         return [df_total, pd.concat([df_top_detail_total, df_detail_total])]
 
-    def _write_sheet_list(self, attribute_manager):
-        write_sheet_list = \
-            super(SupplierFileParser, self)._write_sheet_list(attribute_manager=attribute_manager)
-        write_sheet_list.append(attribute_manager.value(pc.write_detail_sheet))
-        return write_sheet_list
+    def _ignore_not_exist(self) -> bool:
+        return False
+
+    def _first_column_merger(self) -> int:
+        return 0
+
+    def support(self, pay_type):
+        return True
+
+    def _group_column(self, attribute_manager):
+        return [attribute_manager.value(pc.supplier_column),
+                attribute_manager.value(pc.type_column)]
+

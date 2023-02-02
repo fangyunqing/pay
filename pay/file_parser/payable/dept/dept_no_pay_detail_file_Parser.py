@@ -6,12 +6,13 @@
 __author__ = 'fyq'
 
 import pay.constant as pc
-import pandas as pd
-
-from pay.file_parser.dept.abstract_other_column_file_parser import AbstractOtherColumnFileParser
+from pay.file_parser.payable.dept.abstract_other_column_file_parser import AbstractOtherColumnFileParser
 
 
 class DeptNoPayDetailFileParser(AbstractOtherColumnFileParser):
+
+    def _ignore_not_exist(self) -> bool:
+        return True
 
     def support(self, pay_type):
         return pay_type == "dept.no_pay_detail"
@@ -26,10 +27,3 @@ class DeptNoPayDetailFileParser(AbstractOtherColumnFileParser):
                 attribute_manager.value(pc.type_column),
                 attribute_manager.value(pc.pur_group),
                 *attribute_manager.value(pc.no_pay_reason).split(",")]
-
-    def __init__(self):
-        super().__init__()
-        self._insert_name = False
-
-    def _ignore(self):
-        return True

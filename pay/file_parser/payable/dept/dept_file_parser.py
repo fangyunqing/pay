@@ -5,25 +5,23 @@
 
 __author__ = 'fyq'
 
-from pay.file_parser.abstract_default_file_parser import AbstractDefaultFileParser
+from typing import Dict, List
+
+from pandas import DataFrame
+
 import pay.constant as pc
 import pandas as pd
 
+from pay.attribute import AttributeManager
+from pay.file_parser.payable.abstract_common_payable_file_parser import AbstractCommonPayableFileParser
 
-class DeptFileParser(AbstractDefaultFileParser):
 
-    def support(self, pay_type):
-        return pay_type in ("dept.pay", "dept.prepay")
+class DeptFileParser(AbstractCommonPayableFileParser):
 
-    def __init__(self):
-        super().__init__()
-        self._insert_name = False
+    def _insert_name(self) -> bool:
+        return False
 
-    def _group_column(self, attribute_manager):
-        return [attribute_manager.value(pc.supplier_column),
-                attribute_manager.value(pc.type_column)]
-
-    def _do_parse_df_dict(self, df_dict, attribute_manager):
+    def _do_parse_df(self, df_dict: Dict[str, DataFrame], attribute_manager: AttributeManager) -> List[DataFrame]:
         type_column = attribute_manager.value(pc.type_column)
         supplier_column = attribute_manager.value(pc.supplier_column)
         # 分类和供应商分组
@@ -55,3 +53,16 @@ class DeptFileParser(AbstractDefaultFileParser):
                 df_total_list.append(df_total_dict[type_name])
         df_total = pd.concat([df_top_total_total, df_top_total, pd.concat(df_total_list)])
         return [df_total]
+
+    def _ignore_not_exist(self) -> bool:
+        return False
+
+    def _first_column_merger(self) -> int:
+        return False
+
+    def support(self, pay_type):
+        return pay_type in ("dept.pay", "dept.prepay")
+
+    def _group_column(self, attribute_manager):
+        return [attribute_manager.value(pc.supplier_column),
+                attribute_manager.value(pc.type_column)]

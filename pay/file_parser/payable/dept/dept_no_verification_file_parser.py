@@ -6,12 +6,14 @@
 __author__ = 'fyq'
 
 import pay.constant as pc
-import pandas as pd
 
-from pay.file_parser.dept.abstract_other_column_file_parser import AbstractOtherColumnFileParser
+from pay.file_parser.payable.dept.abstract_other_column_file_parser import AbstractOtherColumnFileParser
 
 
 class DeptNoVerificationFileParser(AbstractOtherColumnFileParser):
+
+    def _ignore_not_exist(self) -> bool:
+        return True
 
     def _other_column(self, attribute_manager):
         no_verification_column = [int(c) for c in attribute_manager.value(pc.no_verification).split(",")]
@@ -27,9 +29,3 @@ class DeptNoVerificationFileParser(AbstractOtherColumnFileParser):
     def support(self, pay_type):
         return pay_type == "dept.no_verification"
 
-    def __init__(self):
-        super().__init__()
-        self._insert_name = False
-
-    def _ignore(self):
-        return True

@@ -8,6 +8,7 @@ __author__ = 'fyq'
 from typing import Tuple
 
 from pay.attribute_checker import InvoiceAttributeChecker
+from pay.file_parser.invoice import InvoiceFileParser
 from pay.interface_pay import InterfacePay
 from pay.attribute import common_attribute
 from pay.path_parser import InvoicePathParser
@@ -22,16 +23,20 @@ class InvoicePay(InterfacePay):
         am.clear()
         am.add(common_attribute.read_sheet_attr)
         am.add(common_attribute.skip_rows_attr)
+        am.add(common_attribute.use_columns_attr)
         am.add(common_attribute.money_column_attr)
         am.add(common_attribute.qty_column_attr)
         am.add(common_attribute.rate_column_attr)
         am.add(common_attribute.kind_column_attr)
         am.add(common_attribute.use_column_attr)
         am.add(common_attribute.client_code_column_attr)
+        am.add(common_attribute.write_sheet_attr)
         # 属性检查
         self._attribute_checker_list = [InvoiceAttributeChecker()]
         # 路径解析
         self._path_parser = InvoicePathParser()
+        # 文件解析器
+        self._file_parser = InvoiceFileParser()
 
     def order(self) -> int:
         return 9

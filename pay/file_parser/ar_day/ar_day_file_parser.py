@@ -6,47 +6,36 @@
 __author__ = 'fyq'
 
 import calendar
-import datetime
+from typing import Dict, Iterable, List
 
 import pythoncom
+from pandas import DataFrame
 
-from pay.decorator.pay_log import PayLog
-from pay.file_parser.abstract_default_file_parser import AbstractDefaultFileParser
+from pay.attribute import AttributeManager
+from pay.create_describe_4_excel import DefaultCreateDescribe4Excel
+from pay.create_describe_4_excel.describe_excel import DescribeExcel
 import pay.constant as pc
 import pandas as pd
 import xlwings as xl
-from decimal import Decimal
+
+from pay.file_parser.ar_day.abstract_ar_day_file_parser import AbstractARDayFileParser
+from util import pd_util
 
 
-class ARDayFileParser(AbstractDefaultFileParser):
+class ARDayFileParser(AbstractARDayFileParser):
 
-    def _do_parse_df_dict(self, df_dict, attribute_manager):
-        # 用户对照
-        client_map = str(attribute_manager.value(pc.client_map))
-        # 应收出纳数据
-        ar_day_data = str(attribute_manager.value(pc.ar_day_data))
-
-        df_client_map = None
-        df_ar_day_data = None
-        for key in df_dict.keys():
-            if client_map.startswith(key):
-                df_client_map = df_dict[key]
-            elif ar_day_data.startswith(key):
-                df_ar_day_data = df_dict[key]
-
-        if df_client_map is None:
-            raise Exception("无法找用户对照表,请检查是否配置")
-        if df_ar_day_data is None:
-            raise Exception("无法找数据表,请检查是否配置")
-
+    def _do_merger(self,
+                   client_map_df: DataFrame,
+                   ar_day_df: DataFrame,
+                   attribute_manager: AttributeManager) -> List[DataFrame]:
         ar_begin_date = str(attribute_manager.value(pc.ar_begin_date))
         ar_end_date = str(attribute_manager.value(pc.ar_end_date))
         pay_date_column = str(attribute_manager.value(pc.pay_date))
-        df_ar_day_data.dropna(inplace=True)
-        df_ar_day_data[pay_date_column] = pd.to_datetime(df_ar_day_data[pay_date_column], format="%Y-%m-%d")
-        df_ar_day_data.drop(df_ar_day_data[~((df_ar_day_data[pay_date_column] >= ar_begin_date)
-                                             & (df_ar_day_data[pay_date_column] <= ar_end_date))].index,
-                            inplace=True)
+        ar_day_df.dropna(inplace=True)
+        ar_day_df[pay_date_column] = pd.to_datetime(ar_day_df[pay_date_column], format="%Y-%m-%d")
+        ar_day_df.drop(ar_day_df[~((ar_day_df[pay_date_column] >= ar_begin_date)
+                                   & (ar_day_df[pay_date_column] <= ar_end_date))].index,
+                       inplace=True)
         water_bill_code = str(attribute_manager.value(pc.water_bill_code))
         map_water_bill_code = str(attribute_manager.value(pc.map_water_bill_code))
         map_bill_code = str(attribute_manager.value(pc.map_bill_code))
@@ -54,10 +43,10 @@ class ARDayFileParser(AbstractDefaultFileParser):
         currency_column = str(attribute_manager.value(pc.currency))
         ar_money_column = str(attribute_manager.value(pc.ar_money))
         # 遍历数据行
-        df_ar_day_data[pc.bill_code] = ""
-        df_ar_day_data[pc.pay_client_name] = ""
-        for row_index, row in df_ar_day_data.iterrows():
-            df_bill_code = df_client_map[df_client_map[map_water_bill_code] == row[water_bill_code]]
+        ar_day_df[pc.bill_code] = ""
+        ar_day_df[pc.pay_client_name] = ""
+        for row_index, row in ar_day_df.iterrows():
+            df_bill_code = client_map_df[client_map_df[map_water_bill_code] == row[water_bill_code]]
             bill_code_list = []
             map_client_name_list = []
             for value in df_bill_code[map_bill_code]:
@@ -65,81 +54,44 @@ class ARDayFileParser(AbstractDefaultFileParser):
             for value in df_bill_code[map_client_name_column]:
                 map_client_name_list.append(value)
             bill_code_list = list(set(bill_code_list))
-            df_ar_day_data.loc[row_index, pc.bill_code] = ",".join(bill_code_list)
-            df_ar_day_data.loc[row_index, pc.pay_client_name] = ",".join(map_client_name_list)
-        df_ar_day_data[currency_column] = df_ar_day_data[currency_column]. \
+            ar_day_df.loc[row_index, pc.bill_code] = ",".join(bill_code_list)
+            ar_day_df.loc[row_index, pc.pay_client_name] = ",".join(map_client_name_list)
+        ar_day_df[currency_column] = ar_day_df[currency_column]. \
             apply(lambda val: "人民币" if val.strip() == "RMB" else "美元")
-        df_ar_day_data[ar_money_column] = df_ar_day_data[ar_money_column]. \
+        ar_day_df[ar_money_column] = ar_day_df[ar_money_column]. \
             apply(lambda x: float(x) / 10000)
-        return [df_ar_day_data]
+        return [ar_day_df]
 
-    def _group_column(self, attribute_manager):
-        pass
-
-    def support(self, pay_type):
-        return True
-
-    def _parser_file(self, key, file, attribute_manager):
-        # 用户对照
+    def _do_read_client_map_data(self, file_dict: Dict[str, Iterable],
+                                 attribute_manager: AttributeManager) -> DataFrame:
         client_map = str(attribute_manager.value(pc.client_map))
-        # 应收出纳数据
-        ar_day_data = str(attribute_manager.value(pc.ar_day_data))
-
-        df = None
-        info = None
-        use_column = None
-        if client_map.startswith(key):
-            info = client_map.split(",")
-            use_column = self._map_use_column(attribute_manager)
-        elif ar_day_data.startswith(key):
-            info = ar_day_data.split(",")
-            use_column = self._data_use_column(attribute_manager)
-
-        if info is None:
-            return None
-
-        df_read_dict = pd.read_excel(io=file,
-                                     sheet_name=None,
-                                     skiprows=int(info[2]),
-                                     header=None,
-                                     dtype=str)
-        for sheet_name in df_read_dict.keys():
-            if sheet_name.strip() == info[1].strip():
-                df = df_read_dict[sheet_name]
-                break
-
-        if df is None:
-            raise Exception("[%s]中无法找工作簿[%s]" % (file, info[1]))
-
-        df.columns = [str(column) for column in df.columns]
-        useless_column = []
-        for value in df.columns:
-            if value not in use_column:
-                useless_column.append(value)
-        # 去除无用的列
-        if len(useless_column) > 0:
-            df.drop(useless_column, axis=1, inplace=True, errors="ignore")
-        # 删除nan
+        info = client_map.split(",")
+        use_column = self._map_use_column(attribute_manager)
+        df = pd_util.pd_read_excel(file_info=info,
+                                   file_dict=file_dict,
+                                   use_column=use_column)
         df.dropna(how="all")
 
         return df
 
-    @classmethod
-    def _map_use_column(cls, attribute_manager):
-        return attribute_manager.value(pc.map_water_bill_code), \
-               attribute_manager.value(pc.map_bill_code), \
-               attribute_manager.value(pc.map_client_name)
+    def _do_read_ar_day_data(self, file_dict: Dict[str, Iterable], attribute_manager: AttributeManager) -> DataFrame:
+        ar_day_data = str(attribute_manager.value(pc.ar_day_data))
+        info = ar_day_data.split(",")
+        use_column = self._data_use_column(attribute_manager)
+        df = pd_util.pd_read_excel(file_info=info,
+                                   file_dict=file_dict,
+                                   use_column=use_column)
+        df.dropna(how="all")
 
-    @classmethod
-    def _data_use_column(cls, attribute_manager):
-        return attribute_manager.value(pc.water_bill_code), \
-               attribute_manager.value(pc.pay_date), \
-               attribute_manager.value(pc.ar_money), \
-               attribute_manager.value(pc.currency), \
-               attribute_manager.value(pc.water_client_name)
+        return df
 
-    @PayLog(node="渲染excel")
-    def _render_target(self, describe_excel_list, attribute_manager, target_file):
+    def _do_create_describe_4_excel(self, df_list: List[DataFrame], attribute_manager: AttributeManager):
+        return DefaultCreateDescribe4Excel().create_describe_4_excel(df_list=df_list,
+                                                                     attribute_manager=attribute_manager)
+
+    def _do_render_target(self, describe_excel_list: List[DescribeExcel],
+                          attribute_manager: AttributeManager,
+                          target_file: str):
         pythoncom.CoInitialize()
         app = xl.App(visible=False, add_book=False)
         try:
@@ -215,14 +167,14 @@ class ARDayFileParser(AbstractDefaultFileParser):
                                         tract_list.append(str(ar_money) + "(全部金额)")
                                     elif ar_money > t_r[n_r_column]:
                                         df.loc[t_index, location_day] = \
-                                            df_bill_code.loc[t_index, location_day]\
+                                            df_bill_code.loc[t_index, location_day] \
                                             + df_bill_code.loc[t_index, n_r_column]
                                         df_bill_code.loc[t_index, location_day] = \
                                             df_bill_code.loc[t_index, location_day] + t_r[n_r_column]
                                         df.loc[t_index, r_i_column] = \
                                             df_bill_code.loc[t_index, r_i_column] \
                                             + df_bill_code.loc[t_index, n_r_column]
-                                        df_bill_code.loc[t_index, r_i_column] =  \
+                                        df_bill_code.loc[t_index, r_i_column] = \
                                             df_bill_code.loc[t_index, r_i_column] \
                                             + df_bill_code.loc[t_index, n_r_column]
                                         df.loc[t_index, n_r_column] = 0
@@ -298,8 +250,64 @@ class ARDayFileParser(AbstractDefaultFileParser):
             app.kill()
             pythoncom.CoUninitialize()
 
-    def _write_excel(self, describe_excel_list, attribute_manager, target_file):
-        pass
+    def support(self, pay_type):
+        return True
 
-    def _reset_index(self, df_parse_list, attribute_manager):
-        pass
+    def _parser_file(self, key, file, attribute_manager):
+        # 用户对照
+        client_map = str(attribute_manager.value(pc.client_map))
+        # 应收出纳数据
+        ar_day_data = str(attribute_manager.value(pc.ar_day_data))
+
+        df = None
+        info = None
+        use_column = None
+        if client_map.startswith(key):
+            info = client_map.split(",")
+            use_column = self._map_use_column(attribute_manager)
+        elif ar_day_data.startswith(key):
+            info = ar_day_data.split(",")
+            use_column = self._data_use_column(attribute_manager)
+
+        if info is None:
+            return None
+
+        df_read_dict = pd.read_excel(io=file,
+                                     sheet_name=None,
+                                     skiprows=int(info[2]),
+                                     header=None,
+                                     dtype=str)
+        for sheet_name in df_read_dict.keys():
+            if sheet_name.strip() == info[1].strip():
+                df = df_read_dict[sheet_name]
+                break
+
+        if df is None:
+            raise Exception("[%s]中无法找工作簿[%s]" % (file, info[1]))
+
+        df.columns = [str(column) for column in df.columns]
+        useless_column = []
+        for value in df.columns:
+            if value not in use_column:
+                useless_column.append(value)
+        # 去除无用的列
+        if len(useless_column) > 0:
+            df.drop(useless_column, axis=1, inplace=True, errors="ignore")
+        # 删除nan
+        df.dropna(how="all")
+
+        return df
+
+    @classmethod
+    def _map_use_column(cls, attribute_manager):
+        return attribute_manager.value(pc.map_water_bill_code), \
+               attribute_manager.value(pc.map_bill_code), \
+               attribute_manager.value(pc.map_client_name)
+
+    @classmethod
+    def _data_use_column(cls, attribute_manager):
+        return attribute_manager.value(pc.water_bill_code), \
+               attribute_manager.value(pc.pay_date), \
+               attribute_manager.value(pc.ar_money), \
+               attribute_manager.value(pc.currency), \
+               attribute_manager.value(pc.water_client_name)

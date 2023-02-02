@@ -15,7 +15,7 @@ class FileParser(metaclass=ABCMeta):
 
     @abstractmethod
     def parse_file(self,
-                   file_dict: Tuple[Optional[str], Dict[str, Iterable], Optional[str]],
+                   file_dict: Dict[str, Iterable],
                    target_file: Optional[str],
                    attribute_manager: AttributeManager) -> None:
         """

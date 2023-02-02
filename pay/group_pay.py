@@ -8,7 +8,7 @@ __author__ = 'fyq'
 from pay.interface_pay import InterfacePay
 import pay.constant as pc
 from pay.attribute.attribute import Attribute
-from pay.file_parser.group_file_parser import GroupFileParser
+from pay.file_parser.payable.group.group_file_parser import GroupFileParser
 
 
 class GroupPay(InterfacePay):

@@ -34,3 +34,12 @@ read_sheet = "read_sheet"
 
 # 跳过的行数
 skip_rows = "skip_rows"
+
+# 首列是否进行单元格合并
+first_column_merger = "first_column_merger"
+
+# 用到的列
+use_columns = "use_columns"
+
+# 写入的工作簿信息 工作簿,跳过的行,跳过的列
+write_sheet = "write_sheet"

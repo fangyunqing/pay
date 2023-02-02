@@ -5,6 +5,6 @@
 
 __author__ = 'fyq'
 
-
-from .total_describe_excel import TotalDescribeExcel
 from .describe_excel import DescribeExcel
+from .total_describe_excel import TotalDescribeExcel
+

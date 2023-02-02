@@ -7,7 +7,7 @@ __author__ = 'fyq'
 
 from pay.attribute.attribute import Attribute
 from pay.attribute_checker import PDFAttributeChecker
-from pay.file_parser.wei_lin_pdf_file_parser import WeiLinPafFileParser
+from pay.file_parser.pdf.wei_lin_pdf_file_parser import WeiLinPafFileParser
 from pay.interface_pay import InterfacePay
 from pay.path_parser.pdf_path_parser import PdfPathParser
 import pay.constant as pc

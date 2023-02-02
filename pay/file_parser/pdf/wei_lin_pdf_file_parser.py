@@ -6,7 +6,7 @@
 __author__ = 'fyq'
 
 from pay.create_describe_4_excel.default_create_describe_4_excel import DefaultCreateDescribe4Excel
-from pay.file_parser.abstract_pdf_file_parser import AbstractPdfFileParser
+from pay.file_parser.pdf.abstract_pdf_file_parser import AbstractPdfFileParser
 from pay.handle_parser.wei_lin_pdf_handle_parser import WeiLinPdfHandleParser
 from pay.render.default_render import DefaultRender
 from pay.write_excel.default_write_excel import DefaultWriteExcel

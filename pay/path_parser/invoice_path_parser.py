@@ -48,7 +48,7 @@ class InvoicePathParser(PathParser):
                     file = "0" + file
                 if len(file) != 4:
                     raise exceptions.InvoicePayException(f"{file}不是一个正确的时间格式")
-                invoice_time = str(today.year) + file
+                invoice_time = str(today.year) + "-" + file[0:2] + "-" + file[2:4]
                 file_dict[invoice_time] = SortedKeyList(key=sort)
                 for deep_file in os.listdir(file_path):
                     if not self._is_ignore_file(deep_file):

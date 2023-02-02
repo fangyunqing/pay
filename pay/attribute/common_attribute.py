@@ -66,3 +66,21 @@ skip_rows_attr = Attribute(name=attr_string.skip_rows,
                            text="[解析]跳过的行数",
                            data_type="int",
                            required=True)
+
+# 首列是否单元格合并
+first_column_merger_attr = Attribute(name=attr_string.first_column_merger,
+                                     text="first_column_merger",
+                                     data_type="int",
+                                     required=False)
+
+# 用到列
+use_columns_attr = Attribute(name=attr_string.use_columns,
+                             text="[解析]需要的列(eg: A,B or 1,2)",
+                             data_type="str",
+                             required=True)
+
+# 写入的工作簿信息 工作簿,跳过的行,跳过的列
+write_sheet_attr = Attribute(name=attr_string.write_sheet,
+                             text="[模板]写入的工作簿名称[工作簿名,跳过的行,跳过的列]",
+                             data_type="str",
+                             required=True)

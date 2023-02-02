@@ -6,23 +6,22 @@
 __author__ = 'fyq'
 
 from abc import abstractmethod
+from typing import Dict, List
 
-from pay.file_parser.abstract_default_file_parser import AbstractDefaultFileParser
+from pandas import DataFrame
+
+from pay.attribute import AttributeManager
+from pay.file_parser.payable.abstract_common_payable_file_parser import AbstractCommonPayableFileParser
 import pay.constant as pc
 import pandas as pd
 
 
-class AbstractOtherColumnFileParser(AbstractDefaultFileParser):
+class AbstractOtherColumnFileParser(AbstractCommonPayableFileParser):
 
-    def __init__(self):
-        super().__init__()
-        self._insert_name = False
+    def _first_column_merger(self) -> int:
+        return 0
 
-    @abstractmethod
-    def _other_column(self, attribute_manager):
-        pass
-
-    def _do_parse_df_dict(self, df_dict, attribute_manager):
+    def _do_parse_df(self, df_dict: Dict[str, DataFrame], attribute_manager: AttributeManager) -> List[DataFrame]:
         supplier_column = attribute_manager.value(pc.supplier_column)
         pur_group_column = attribute_manager.value(pc.pur_group)
         type_column = attribute_manager.value(pc.type_column)
@@ -51,3 +50,16 @@ class AbstractOtherColumnFileParser(AbstractDefaultFileParser):
         df_total.insert(column=pur_group_column, value="", loc=0)
         df_total.insert(column=type_column, value="", loc=0)
         return [pd.concat([df_total, df_little_total, df_detail])]
+
+    def _insert_name(self) -> bool:
+        return False
+
+    def __init__(self):
+        super().__init__()
+        self._insert_name = False
+
+    @abstractmethod
+    def _other_column(self, attribute_manager):
+        pass
+
+

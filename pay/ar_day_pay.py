@@ -7,7 +7,7 @@ __author__ = 'fyq'
 
 from pay.attribute_checker.ar_day_attribute_checker import ARDayAttributeChecker
 from pay.file_copy.no_file_copy import NoFileCopy
-from pay.file_parser.ar_day_file_parser import ARDayFileParser
+from pay.file_parser.ar_day.ar_day_file_parser import ARDayFileParser
 from pay.interface_pay import InterfacePay
 from pay.attribute.attribute import Attribute
 import pay.constant as pc

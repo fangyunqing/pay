@@ -5,23 +5,24 @@
 
 __author__ = 'fyq'
 
-from pay.file_parser.abstract_default_file_parser import AbstractDefaultFileParser
+from typing import Dict, Iterable, List
+
+from pandas import DataFrame
+
+from pay.attribute import AttributeManager
 import pay.constant as pc
 import pandas as pd
 import yaml
 
+from pay.file_parser.payable.abstract_common_payable_file_parser import AbstractCommonPayableFileParser
 
-class GroupFileParser(AbstractDefaultFileParser):
-    SPLIT_CHAR = ("-", "@")
 
-    def support(self, pay_type):
+class GroupFileParser(AbstractCommonPayableFileParser):
+
+    def _insert_name(self) -> bool:
         return True
 
-    def __init__(self):
-        super().__init__()
-        self._first_merge = True
-
-    def _do_parse_df_dict(self, df_dict, attribute_manager):
+    def _do_parse_df(self, df_dict: Dict[str, DataFrame], attribute_manager: AttributeManager) -> List[DataFrame]:
         type_column = attribute_manager.value(pc.type_column)
         supplier_column = attribute_manager.value(pc.supplier_column)
         for key in df_dict.keys():
@@ -41,34 +42,16 @@ class GroupFileParser(AbstractDefaultFileParser):
         real_df_list, df = self._split_dept(value=yaml.safe_load(attribute_manager.value(pc.dept).replace("yaml", "")),
                                             df_dict=df_dict,
                                             attribute_manager=attribute_manager)
-        # dept_list = list(attribute_manager.value(pc.dept).split(","))
-        # df_list = []
-        # tmp_df_dict = {}
-        # for index, dept in enumerate(dept_list[1:]):
-        #     dept_little = list(dept.split("-"))
-        #     # 大于1 合计项
-        #     if len(dept_little) > 1:
-        #         dept_little_list = []
-        #         for dl in dept_little[1:]:
-        #             if dl in df_dict.keys():
-        #                 dept_little_list.append(df_dict[dl])
-        #         if len(dept_little_list) > 0:
-        #             df_little = pd.concat(dept_little_list)
-        #             df_little = df_little.groupby([type_column], as_index=False).sum()
-        #             df_little.insert(column=self._name_column, value=dept_little[0], loc=0)
-        #             df_little.sort_values(attribute_manager.value(pc.sort_column), ascending=False, inplace=True)
-        #             df_list.append(df_little)
-        #     else:
-        #         if dept in df_dict.keys():
-        #             df_list.append(df_dict[dept])
-        #             tmp_df_dict[dept] = df_dict[dept]
-        # # 总计
-        # df_group = pd.concat(tmp_df_dict.values()).groupby([type_column], as_index=False).sum()
-        # df_group.insert(column=self._name_column, value=dept_list[0], loc=0)
-        # df_group.sort_values(attribute_manager.value(pc.sort_column), ascending=False, inplace=True)
-        # df_list.insert(0, df_group)
-
         return [df]
+
+    def _ignore_not_exist(self) -> bool:
+        return False
+
+    def _first_column_merger(self) -> int:
+        return 1
+
+    def support(self, pay_type):
+        return True
 
     def _group_column(self, attribute_manager):
         return [attribute_manager.value(pc.supplier_column),

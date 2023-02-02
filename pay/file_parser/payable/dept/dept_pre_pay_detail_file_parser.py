@@ -5,14 +5,23 @@
 
 __author__ = 'fyq'
 
-from pay.file_parser.abstract_default_file_parser import AbstractDefaultFileParser
+from typing import Dict, List
+
+from pandas import DataFrame
+
 import pay.constant as pc
 import pandas as pd
 
+from pay.attribute import AttributeManager
+from pay.file_parser.payable.abstract_common_payable_file_parser import AbstractCommonPayableFileParser
 
-class DeptPrePayDetailFileParser(AbstractDefaultFileParser):
 
-    def _do_parse_df_dict(self, df_dict, attribute_manager):
+class DeptPrePayDetailFileParser(AbstractCommonPayableFileParser):
+
+    def _insert_name(self) -> bool:
+        return False
+
+    def _do_parse_df(self, df_dict: Dict[str, DataFrame], attribute_manager: AttributeManager) -> List[DataFrame]:
         supplier_column = attribute_manager.value(pc.supplier_column)
         pur_group_column = attribute_manager.value(pc.pur_group)
         pur_no_column = attribute_manager.value(pc.pur_no)
@@ -35,16 +44,18 @@ class DeptPrePayDetailFileParser(AbstractDefaultFileParser):
             df_total[str(c)] = ""
         return [pd.concat([df_total, df_detail])]
 
+    def _ignore_not_exist(self) -> bool:
+        return False
+
+    def _first_column_merger(self) -> int:
+        return 0
+
     def _group_column(self, attribute_manager):
         return [attribute_manager.value(pc.supplier_column),
                 attribute_manager.value(pc.type_column),
                 attribute_manager.value(pc.pur_group),
                 attribute_manager.value(pc.pur_no),
                 *attribute_manager.value(pc.pre_pay).split(",")]
-
-    def __init__(self):
-        super().__init__()
-        self._insert_name = False
 
     def support(self, pay_type):
         return pay_type == "dept.pre_pay_detail"

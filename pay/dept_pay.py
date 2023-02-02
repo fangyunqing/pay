@@ -6,15 +6,15 @@
 __author__ = 'fyq'
 
 from pay.attribute.attribute import Attribute
-from pay.file_parser.dept.dept_no_verification_file_parser import DeptNoVerificationFileParser
+from pay.file_parser.payable.dept import DeptNoVerificationFileParser
 from pay.interface_pay import InterfacePay
 from pay.path_parser.dept_path_parser import DeptPathParser
 import pay.constant as pc
 import copy
-from pay.file_parser.dept.dept_file_parser import DeptFileParser
-from pay.file_parser.dept.dept_pay_detail_file_parser import DeptPayDetailFileParser
-from pay.file_parser.dept.dept_no_pay_detail_file_Parser import DeptNoPayDetailFileParser
-from pay.file_parser.dept.dept_pre_pay_detail_file_parser import DeptPrePayDetailFileParser
+from pay.file_parser.payable.dept import DeptFileParser
+from pay.file_parser.payable.dept import DeptPayDetailFileParser
+from pay.file_parser.payable.dept import DeptNoPayDetailFileParser
+from pay.file_parser.payable.dept import DeptPrePayDetailFileParser
 
 
 class DeptPay(InterfacePay):
