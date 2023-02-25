@@ -8,6 +8,8 @@ __author__ = 'fyq'
 from pay.file_parser.map import ReconciliationFileParser
 import pay.constant as pc
 import pandas as pd
+from decimal import Decimal
+from decimal import ROUND_HALF_UP, ROUND_HALF_EVEN
 
 
 class TeBuProductFileParser(ReconciliationFileParser):
@@ -27,7 +29,6 @@ class TeBuProductFileParser(ReconciliationFileParser):
 
         map_bill_code = attribute_manager.value(pc.map_bill_code)
         df[pc.new_bill_code] = df[map_bill_code]
-
         first_df = df[[pc.new_bill_code, pc.new_material_name, self.map_qty, self.map_price, self.map_money]] \
             .groupby(by=[pc.new_bill_code, pc.new_material_name, self.map_price], as_index=False) \
             .sum()
@@ -51,12 +52,13 @@ class TeBuProductFileParser(ReconciliationFileParser):
                     _rate.replace("%", "")
                     _rate = float(_rate) / 100 + 1
                 new_price = row[self.data_price] / _rate
-            return round(new_price, 2)
+            return float(Decimal(str(new_price)).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP))
 
         def handle_money(row):
             if pd.isna(row[self.data_qty]) or pd.isna(row[pc.new_price]):
                 return row[self.data_money]
-            return round(row[self.data_qty] * row[pc.new_price], 2)
+            m = round(row[self.data_qty] * row[pc.new_price], 6)
+            return float(Decimal(str(m)).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP))
 
         data_bill_code = attribute_manager.value(pc.data_bill_code)
         df[pc.new_bill_code] = df[data_bill_code]
@@ -70,6 +72,7 @@ class TeBuProductFileParser(ReconciliationFileParser):
 
     def _after_merger(self, df_list, origin_map_df, attribute_manager):
         super(TeBuProductFileParser, self)._after_merger(df_list, origin_map_df, attribute_manager)
+
         if len(df_list) > 0:
             if df_list[0] is not None:
                 label_list = [pc.new_bill_code, pc.new_material_name]

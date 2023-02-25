@@ -31,6 +31,7 @@ class InvoicePay(InterfacePay):
         am.add(common_attribute.use_column_attr)
         am.add(common_attribute.client_code_column_attr)
         am.add(common_attribute.write_sheet_attr)
+        am.add(common_attribute.write_detail_sheet_attr)
         # 属性检查
         self._attribute_checker_list = [InvoiceAttributeChecker()]
         # 路径解析

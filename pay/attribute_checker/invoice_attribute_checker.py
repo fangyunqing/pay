@@ -56,5 +56,6 @@ class InvoiceAttributeChecker(IAttributeChecker):
             attr_string.client_code_column: _check_excel_map,
             attr_string.use_column: _check_excel_map,
             attr_string.use_columns: _check_use_columns,
-            attr_string.write_sheet: _check_write_sheet
+            attr_string.write_sheet: _check_write_sheet,
+            attr_string.write_detail_sheet: _check_write_sheet,
         }

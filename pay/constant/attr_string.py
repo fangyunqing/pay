@@ -43,3 +43,9 @@ use_columns = "use_columns"
 
 # 写入的工作簿信息 工作簿,跳过的行,跳过的列
 write_sheet = "write_sheet"
+
+# 写入的详情工作簿信息 工作簿,跳过的行,跳过的列
+write_detail_sheet = "write_detail_sheet"
+
+# 跳过的文本
+skip_text = "skip_text"

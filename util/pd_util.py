@@ -55,7 +55,7 @@ def pd_read_excel(file_info, file_dict, use_column, data_type=None):
 def pd_read_excel_by_path(file_path: str,
                           read_sheet: str,
                           skip_rows: int,
-                          use_column: typing.List[str],
+                          use_column: typing.Optional[typing.List[str]],
                           limit: bool,
                           limit_value: str,
                           limit_column: typing.Union[str, int]) -> typing.List[DataFrame]:
@@ -84,12 +84,13 @@ def pd_read_excel_by_path(file_path: str,
             if len(s_list) > 0:
                 new_df_list.append(pd.concat(s_list, axis=1).T)
         df_list = new_df_list
-    for df in df_list:
-        df.columns = [str(column) for column in df.columns]
-        useless_column = []
-        for value in df.columns:
-            if value not in use_column:
-                useless_column.append(value)
-        if len(useless_column) > 0:
-            df.drop(useless_column, axis=1, inplace=True, errors="ignore")
+    if use_column:
+        for df in df_list:
+            df.columns = [str(column) for column in df.columns]
+            useless_column = []
+            for value in df.columns:
+                if value not in use_column:
+                    useless_column.append(value)
+            if len(useless_column) > 0:
+                df.drop(useless_column, axis=1, inplace=True, errors="ignore")
     return df_list

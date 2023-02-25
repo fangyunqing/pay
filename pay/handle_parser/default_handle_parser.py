@@ -5,7 +5,6 @@
 
 __author__ = 'fyq'
 
-
 from pay.handle_parser.handle_parser import HandleParser
 import pandas as pd
 
@@ -18,16 +17,26 @@ class DefaultHandleParser(HandleParser):
             raise Exception("对照文件[%s]中未找到" % file_info[0])
         # 读取文件
         file_name = file_dict[file_info[0]][0]
-        df_read_dict = pd.read_excel(io=file_name,
-                                     sheet_name=None,
-                                     skiprows=int(file_info[2]),
-                                     header=None,
-                                     dtype=data_type)
+        sheet_name = file_info[1]
+        sheet_name_l = [sheet_name, sheet_name + " ", " " + sheet_name,
+                        " " + sheet_name + " "]
         df = None
-        for sheet_name in df_read_dict.keys():
-            if sheet_name.strip() == file_info[1].strip():
-                df = df_read_dict[sheet_name]
-                break
+        for sn in sheet_name_l:
+            try:
+                df = pd.read_excel(io=file_name,
+                                   sheet_name=sn,
+                                   skiprows=int(file_info[2]),
+                                   header=None,
+                                   dtype=data_type)
+                if df:
+                    break
+            except ValueError:
+                pass
+
+        # for sheet_name in df_read_dict.keys():
+        #     if sheet_name.strip() == file_info[1].strip():
+        #         df = df_read_dict[sheet_name]
+        #         break
 
         if df is None:
             raise Exception("[%s]中无法找工作簿[%s]" % (file_name, file_info[1]))

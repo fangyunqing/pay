@@ -10,7 +10,6 @@ from abc import ABCMeta, abstractmethod
 from typing import Optional, Tuple, Dict, Iterable
 
 
-
 class PathParser(metaclass=ABCMeta):
 
     @classmethod

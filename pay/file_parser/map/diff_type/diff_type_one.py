@@ -5,6 +5,8 @@
 
 __author__ = 'fyq'
 
+from decimal import Decimal, ROUND_HALF_UP
+
 from pay.file_parser.map.diff_type.diff_type import DiffType
 import numpy as np
 
@@ -46,16 +48,26 @@ class DiffTypeOne(DiffType):
                 for data_index, data_row in data_df.iterrows():
                     if express_param_one.value_list[2] == "0":
                         if single_express.is_mul():
-                            data_df.loc[data_index, diff_column_name] = zero_data * data_row[one_index]
+                            data_df.loc[data_index, diff_column_name] = \
+                                float(Decimal(str(round(zero_data * data_row[one_index], 6)))
+                                      .quantize(Decimal('0.00'), rounding=ROUND_HALF_UP))
                         elif single_express.is_sub():
-                            data_df.loc[data_index, diff_column_name] = zero_data - data_row[one_index]
+                            data_df.loc[data_index, diff_column_name] = \
+                                float(Decimal(str(round(zero_data - data_row[one_index], 6)))
+                                      .quantize(Decimal('0.00'), rounding=ROUND_HALF_UP))
                         elif single_express.is_add():
-                            data_df.loc[data_index, diff_column_name] = zero_data + data_row[one_index]
+                            data_df.loc[data_index, diff_column_name] = \
+                                float(Decimal(str(round(zero_data + data_row[one_index], 6)))
+                                      .quantize(Decimal('0.00'), rounding=ROUND_HALF_UP))
                         else:
-                            data_df.loc[data_index, diff_column_name] = zero_data / data_row[one_index]
+                            data_df.loc[data_index, diff_column_name] = \
+                                float(Decimal(str(round(zero_data / data_row[one_index], 6)))
+                                      .quantize(Decimal('0.00'), rounding=ROUND_HALF_UP))
                     else:
                         if single_express.is_mul():
-                            data_df.loc[data_index, diff_column_name] = data_row[one_index] * zero_data
+                            data_df.loc[data_index, diff_column_name] = \
+                                float(Decimal(str(round(data_row[one_index] * zero_data, 6)))
+                                      .quantize(Decimal('0.00'), rounding=ROUND_HALF_UP))
                         elif single_express.is_sub():
                             data_df.loc[data_index, diff_column_name] = data_row[one_index] - zero_data
                         elif single_express.is_add():
@@ -63,5 +75,5 @@ class DiffTypeOne(DiffType):
                         else:
                             data_df.loc[data_index, diff_column_name] = data_row[one_index] / zero_data
                     data_df.loc[data_index, diff_column_name + "-1"] = \
-                        round(data_df.loc[data_index, diff_column_name] - data_row[data_diff], 6)
+                        round(data_df.loc[data_index, diff_column_name] - round(data_row[data_diff], 6), 6)
                 return False

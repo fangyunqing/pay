@@ -84,3 +84,15 @@ write_sheet_attr = Attribute(name=attr_string.write_sheet,
                              text="[模板]写入的工作簿名称[工作簿名,跳过的行,跳过的列]",
                              data_type="str",
                              required=True)
+
+# 写入的详情工作簿信息 工作簿,跳过的行,跳过的列
+write_detail_sheet_attr = Attribute(name=attr_string.write_detail_sheet,
+                                    text="[模板]写入的详情工作簿名称[工作簿名,跳过的行,跳过的列]",
+                                    data_type="str",
+                                    required=True)
+
+# 跳过的文本
+skip_text_attr = Attribute(name=attr_string.skip_text,
+                           text="[解析]跳过的文本",
+                           data_type="str",
+                           required=False)

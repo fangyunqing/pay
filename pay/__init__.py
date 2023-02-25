@@ -16,5 +16,6 @@ from pay.pdf_py import PdfPay
 from pay.reconciliation_pay import ReconciliationPay
 from pay.supplier_pay import SupplierPay
 from pay.invoice_pay import InvoicePay
+from pay.invoice_2_pay import Invoice2Pay
 
 __all__ = [pay_type, PayManager]

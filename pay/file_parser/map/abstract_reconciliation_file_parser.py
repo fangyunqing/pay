@@ -85,10 +85,11 @@ class AbstractReconciliationFileParser(AbstractMapFileParser):
                                                           data_df=data_df,
                                                           attribute_manager=attribute_manager))
             elif callable(map_df):
-                df_collect_list.append(self._doing_merger(map_df_info=[map_df(df_collect_list[map_df_index - 1][1]),
-                                                                       search_column_list],
-                                                          data_df=data_df,
-                                                          attribute_manager=attribute_manager))
+                if df_collect_list[map_df_index - 1][1] is not None:
+                    df_collect_list.append(self._doing_merger(map_df_info=[map_df(df_collect_list[map_df_index - 1][1]),
+                                                                           search_column_list],
+                                                              data_df=data_df,
+                                                              attribute_manager=attribute_manager))
 
         for df_collect in df_collect_list:
             df_result, df_not_found, df_total = df_collect

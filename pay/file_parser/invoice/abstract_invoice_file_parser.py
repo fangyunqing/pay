@@ -29,6 +29,11 @@ class AbstractInvoiceFileParser(FileParser):
         # 索引重建
         self._reset_index(df_list=df_list,
                           attribute_manager=attribute_manager)
+
+        # 处理列
+        self._handle_column(df_list=df_list,
+                            attribute_manager=attribute_manager)
+
         # 创建excel描述符
         describe_excel_list = self._create_describe_4_excel(df_list=df_list,
                                                             attribute_manager=attribute_manager)
@@ -114,4 +119,12 @@ class AbstractInvoiceFileParser(FileParser):
     def _do_render_target(self, describe_excel_list: List[DescribeExcel],
                           attribute_manager: AttributeManager,
                           target_file: str):
+        pass
+
+    @PayLog(node="处理列")
+    def _handle_column(self, df_list: List[DataFrame], attribute_manager: AttributeManager):
+        self._do_handle_column(df_list=df_list, attribute_manager=attribute_manager)
+
+    @abstractmethod
+    def _do_handle_column(self, df_list: List[DataFrame], attribute_manager: AttributeManager):
         pass

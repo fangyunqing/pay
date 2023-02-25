@@ -6,11 +6,17 @@
 __author__ = 'fyq'
 
 import os
+
+import typing
+
 from pay.path_parser.path_parser import PathParser
 from pay.decorator.pay_log import PayLog
 
 
 class SimplePathParser(PathParser):
+
+    def __init__(self, key_func: typing.Optional[typing.Callable[[str], str]] = None):
+        self.key_func = key_func
 
     def parse_path(self, path, date_length):
         file_dict = {}
@@ -19,5 +25,6 @@ class SimplePathParser(PathParser):
             if os.path.isfile(file_path):
                 if not self._is_ignore_file(file):
                     file = file.replace(".xlsx", "").replace(".xls", "").strip()
-                    file_dict[file] = [file_path]
+                    key = self.key_func(file) if self.key_func else file
+                    file_dict[key] = [file_path]
         return None, file_dict, None
