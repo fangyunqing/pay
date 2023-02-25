@@ -23,8 +23,8 @@ class PayManager:
     def parse(self, angle, model_name, path, template_file):
         attribute_data = ModelUtil(angle).read_file_only(model_name)
         for pay in self.pay_list:
-            p, p_n = pay.pay_name()
-            if p == angle:
+            pay_info = pay.pay_name()
+            if pay_info[0] == angle:
                 pay.parse(attribute_data=attribute_data,
                           path=path,
                           template_file=template_file)

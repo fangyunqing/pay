@@ -20,6 +20,9 @@ kind_column = "kind_column"
 # 用途列
 use_column = "use_column"
 
+# 检验列
+check_column = "check"
+
 # 客户编码列
 client_code_column = "client_code_column"
 
@@ -49,3 +52,21 @@ write_detail_sheet = "write_detail_sheet"
 
 # 跳过的文本
 skip_text = "skip_text"
+
+# 位置-公司名称
+location_company: str = "location_company"
+
+# 位置-人员
+location_person: str = "location-person"
+
+# 期初货币
+location_opening_currency: str = "location_opening_currency"
+
+# 应收货币
+location_pay_currency: str = "location_pay_currency"
+
+# 收回币种
+location_back_currency: str = "location_back_currency"
+
+# 文件名称
+datafile: str = "数据文件"

@@ -49,6 +49,13 @@ client_code_column_attr = Attribute(name=attr_string.client_code_column,
                                     text="[解析]客户编码列(eg: A or 1)",
                                     data_type="str",
                                     required=True)
+
+# 检验列
+check_column_attr = Attribute(name=attr_string.check_column,
+                              text="[解析]检验列(eg: A or 1)",
+                              data_type="str",
+                              required=True)
+
 # 数据文件
 data_file_attr = Attribute(name=attr_string.data_file,
                            text="数据文件[文件名,工作簿名,跳过的行数]",
@@ -96,3 +103,38 @@ skip_text_attr = Attribute(name=attr_string.skip_text,
                            text="[解析]跳过的文本",
                            data_type="str",
                            required=False)
+
+# 位置-公司名称
+location_company_attr = Attribute(name=attr_string.location_company,
+                                  text="位置-公司名称[列位置,写入行,写入的列,optional(在什么之后)]",
+                                  data_type="str",
+                                  required=True)
+
+# 位置-人员
+location_person_attr = Attribute(name=attr_string.location_person,
+                                 text="位置-人员[列位置,写入行,写入的列,optional(在什么之后)]",
+                                 data_type="str",
+                                 required=True)
+# 位置-期初货币
+location_opening_currency_attr = Attribute(name=attr_string.location_opening_currency,
+                                           text="位置-期初货币[列位置,写入行,写入的列,optional(在什么之后)]",
+                                           data_type="str",
+                                           required=True)
+
+# 位置-应收货币
+location_pay_currency_attr = Attribute(name=attr_string.location_pay_currency,
+                                       text="位置-应收货币[列位置,写入行,写入的列,optional(在什么之后)]",
+                                       data_type="str",
+                                       required=True)
+
+# 位置-收回币种
+location_back_currency_attr = Attribute(name=attr_string.location_back_currency,
+                                        text="位置-收回币种[列位置,写入行,写入的列,optional(在什么之后)]",
+                                        data_type="str",
+                                        required=True)
+
+# 数据文件
+datafile_attr = Attribute(name=attr_string.datafile,
+                          text="数据文件",
+                          data_type="str",
+                          required=True)

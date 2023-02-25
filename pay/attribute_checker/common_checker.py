@@ -219,3 +219,32 @@ class CommonChecker:
         split_list = list(val.split(","))
         if len(split_list) < 2:
             raise Exception("配置项[%s]:[%s]格式必须为 result1,result2 eg 剔除,拆单" % (key, val))
+
+    @classmethod
+    def check_location_item(cls, key, val):
+        """
+            位置信息  列位置,写入行,写入的列,optional(在什么之后) A,2,A,姓名
+        :param key:
+        :param val:
+        :return:
+        """
+        split_list = list(val.split(","))
+        if len(split_list) < 3:
+            raise Exception("配置项[%s]:[%s]格式必须为 列位置,写入行,写入的列,optional(在什么之后) eg A,2,A,姓名" % (key, val))
+        location = split_list[0]
+        col = split_list[2]
+        row = split_list[1]
+        col = CommonChecker.check_excel_map(key, col)
+        location = CommonChecker.check_excel_map(key, location)
+        if int(row) < 0:
+            raise Exception("配置项[%s]:[%s] 行数不能小于0" % (key, val))
+
+        split_list[0] = location
+        split_list[1] = row
+        split_list[2] = col
+
+        if len(split_list) == 3:
+            split_list.append("")
+
+        return ",".join(split_list)
+

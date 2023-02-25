@@ -119,11 +119,15 @@ class InterfacePay(metaclass=ABCMeta):
         logger.info("开始处理模块[%s]" % self.pay_name()[1])
         # 解析路径
         prefix_date, file_dict, target = self._parse_path(path=path, date_length=6)
+        file_dict["parse_path"] = path
         # 拷贝模板文件
-        target_file = self._copy_file(template_file=template_file,
-                                      path=path,
-                                      target=target,
-                                      prefix_date=prefix_date)
+        if template_file and len(template_file.strip()) > 0:
+            target_file = self._copy_file(template_file=template_file,
+                                          path=path,
+                                          target=target,
+                                          prefix_date=prefix_date)
+        else:
+            target_file = None
 
         for attribute_name in attribute_data.keys():
             try:
@@ -185,7 +189,7 @@ class InterfacePay(metaclass=ABCMeta):
                 return po[0]
 
     @abstractmethod
-    def pay_name(self) -> Tuple[str, str]:
+    def pay_name(self) -> Tuple[str, str, bool]:
         pass
 
     @abstractmethod

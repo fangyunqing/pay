@@ -17,5 +17,6 @@ from pay.reconciliation_pay import ReconciliationPay
 from pay.supplier_pay import SupplierPay
 from pay.invoice_pay import InvoicePay
 from pay.invoice_2_pay import Invoice2Pay
+from pay.reconciliation_letter import ReconciliationLetter
 
 __all__ = [pay_type, PayManager]

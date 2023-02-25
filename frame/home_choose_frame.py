@@ -17,6 +17,7 @@ class HomeChooseFrame(ttk.Frame):
         super().__init__(master, **kw)
         self.option_info = option_info
         self.target = self.option_info[1]
+        self.need_template = self.option_info[2] if len(self.option_info) > 2 else True
         # 生效
         self.enable = ttk.IntVar(0)
         # 文件夹选择
@@ -28,7 +29,9 @@ class HomeChooseFrame(ttk.Frame):
         self.le_file = LabelEditFrame(master=self,
                                       label_text="模板",
                                       button_command="file")
-        self.le_file.pack(side=ttk.TOP, fill=ttk.X, padx=5, pady=5)
+        self.le_file.pack(side=ttk.TOP, fill=ttk.X, padx=5, pady=5, )
+        if not self.need_template:
+            self.le_file.pack_forget()
         # 设置参数
         self.le_option = LabelEditFrame(master=self,
                                         edit_type=LabelEditFrame.COMBOBOX,

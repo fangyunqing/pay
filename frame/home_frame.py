@@ -82,7 +82,7 @@ class HomeFrame(ttk.Frame):
                 if len(options.get("parse_dir")) <= 0:
                     Messagebox.show_error(message="请选择[{}]的文件夹".format(tab.option_info[1]))
                     return
-                if len(options.get("model_file")) <= 0:
+                if len(options.get("model_file")) <= 0 and tab.need_template:
                     Messagebox.show_error(message="请选择[{}]的模板".format(tab.option_info[1]))
                     return
                 if len(options.get("model_name")) <= 0:

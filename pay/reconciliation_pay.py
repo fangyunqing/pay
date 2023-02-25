@@ -21,7 +21,7 @@ class ReconciliationPay(InterfacePay):
     def order(self) -> int:
         return 5
 
-    def pay_name(self):
+    def pay_name(self) :
         return "reconciliation", "应收对账"
 
     def pay_options(self):
