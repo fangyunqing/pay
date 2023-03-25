@@ -71,5 +71,5 @@ class TotalRender(DefaultRender):
                 sheet.api.PageSetup.PrintArea = \
                     "$" + CommonChecker.get_excel_column(describe_excel.start_column) + "$1" + ":$" + \
                     CommonChecker.get_excel_column(column_end - 2 if has_check else column_end - 1) + \
-                    str(row_end)
+                    "$" + str(row_end)
                 app.api.ActiveWindow.View = 2

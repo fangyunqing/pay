@@ -59,14 +59,17 @@ location_company: str = "location_company"
 # 位置-人员
 location_person: str = "location-person"
 
-# 期初货币
+# 位置-期初货币
 location_opening_currency: str = "location_opening_currency"
 
-# 应收货币
+# 位置-应收货币
 location_pay_currency: str = "location_pay_currency"
 
-# 收回币种
+# 位置-收回币种
 location_back_currency: str = "location_back_currency"
+
+# 位置-电话号码
+location_phone: str = "location_phone"
 
 # 文件名称
 datafile: str = "数据文件"

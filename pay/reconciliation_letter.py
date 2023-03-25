@@ -45,6 +45,7 @@ class ReconciliationLetter(InterfacePay):
         am.add(common_attribute.location_opening_currency_attr)
         am.add(common_attribute.location_pay_currency_attr)
         am.add(common_attribute.location_back_currency_attr)
+        am.add(common_attribute.location_phone_attr)
         am.add(common_attribute.check_column_attr)
 
         # 属性检查

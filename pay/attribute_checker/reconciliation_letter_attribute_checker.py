@@ -47,4 +47,5 @@ class ReconciliationLetterAttributeChecker(IAttributeChecker):
             attr_string.location_person: _check_location,
             attr_string.data_file: _check_map,
             attr_string.check_column: _check_excel_map,
+            attr_string.location_phone: _check_location,
         }

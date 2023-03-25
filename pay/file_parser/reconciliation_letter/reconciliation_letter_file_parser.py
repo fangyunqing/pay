@@ -68,8 +68,10 @@ class ReconciliationLetterFileParser(AbstractReconciliationLetterFileParser):
         location_pay_currency: str = attribute_manager.value(attr_string.location_pay_currency)
         location_back_currency: str = attribute_manager.value(attr_string.location_back_currency)
         location_opening_currency: str = attribute_manager.value(attr_string.location_opening_currency)
+        location_phone: str = attribute_manager.value(attr_string.location_phone)
         location_list: List[str] = [location_company, location_person, location_pay_currency,
-                                    location_back_currency, location_opening_currency]
+                                    location_back_currency, location_opening_currency,
+                                    location_phone]
         check_column = int(attribute_manager.value(attr_string.check_column))
 
         person_column = int(location_person.split(",")[0])
@@ -78,16 +80,24 @@ class ReconciliationLetterFileParser(AbstractReconciliationLetterFileParser):
         try:
             app.display_alerts = False
             for data_name in data_df_dict.keys():
-                os.makedirs(target_path + os.path.sep + data_name, exist_ok=True)
+
                 map_rows = map_df[map_df[0] == data_name]
                 model_paths: List[str] = []
-                for map_index, map_rows in map_rows.iterrows():
-                    mn: str = map_rows[1]
-                    if mn in model_dict:
-                        model_path = model_dict[mn]
-                        model_paths.append(mn + "," + os.path.splitext(model_path)[1] + "," + model_path)
-                    else:
-                        logger.warning(f"工作簿{data_name}未找到对应模板")
+                if len(map_rows) > 0:
+                    os.makedirs(target_path + os.path.sep + data_name, exist_ok=True)
+                    for map_index, map_rows in map_rows.iterrows():
+                        mn: str = map_rows[1]
+                        area: str = map_rows[2]
+                        if mn in model_dict:
+                            model_path = model_dict[mn]
+                            model_paths.append(mn + "," +
+                                               os.path.splitext(model_path)[1] + "," +
+                                               model_path + "," +
+                                               area)
+                        else:
+                            logger.warning(f"工作簿{data_name}未找到对应模板")
+                else:
+                    logger.warning(f"工作簿{data_name}未找到对应模板")
 
                 if len(model_paths) == 0:
                     continue
@@ -103,7 +113,7 @@ class ReconciliationLetterFileParser(AbstractReconciliationLetterFileParser):
                         continue
 
                     for model_path in model_paths:
-                        mn, ext, mp = model_path.split(",")
+                        mn, ext, mp, area = model_path.split(",")
                         target_file_path = target_path + os.path.sep + data_name + os.path.sep + mn + "-" + p + ext
                         des_wb = app.books.add()
                         try:
@@ -117,12 +127,10 @@ class ReconciliationLetterFileParser(AbstractReconciliationLetterFileParser):
                                         val = data_row[int(loc)]
                                         row = int(row) + 1
                                         col = int(col) + 1
-                                        old_val = sheet.range((row, col)).value
+                                        old_val: str = sheet.range((row, col)).value
                                         if text and len(text) > 0:
-                                            find_key_list = list(pp.Keyword(text).scan_string(old_val))
-                                            if len(find_key_list) > 0:
-                                                tokens, start, end = find_key_list[-1]
-                                                new_val = old_val[0: end + 1] + val
+                                            if text in old_val:
+                                                new_val = old_val.replace(text, str(val))
                                             else:
                                                 new_val = val
                                         else:
@@ -133,8 +141,12 @@ class ReconciliationLetterFileParser(AbstractReconciliationLetterFileParser):
                                     sheet.copy(after=des_wb.sheets[0])
                                 finally:
                                     src_wb.close()
-                        finally:
                             des_wb.sheets[0].delete()
+                            for des_sheet in des_wb.sheets:
+                                des_sheet.api.PageSetup.PaperSize = 8
+                                des_sheet.api.PageSetup.Orientation = 2
+                                des_sheet.api.PageSetup.PrintArea = area
+                        finally:
                             des_wb.save(target_file_path)
                             des_wb.close()
         finally:

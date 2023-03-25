@@ -133,6 +133,12 @@ location_back_currency_attr = Attribute(name=attr_string.location_back_currency,
                                         data_type="str",
                                         required=True)
 
+# 位置-电话号码
+location_phone_attr = Attribute(name=attr_string.location_phone,
+                                text="位置-电话号码[列位置,写入行,写入的列,optional(在什么之后)]",
+                                data_type="str",
+                                required=True)
+
 # 数据文件
 datafile_attr = Attribute(name=attr_string.datafile,
                           text="数据文件",

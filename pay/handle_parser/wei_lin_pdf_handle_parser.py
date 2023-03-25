@@ -5,8 +5,11 @@
 
 __author__ = 'fyq'
 
+from typing import List, Any
+
 import pandas
 import pdfplumber
+from loguru import logger
 
 from pay.handle_parser.handle_parser import HandleParser
 from util import format_date, re_startswith
@@ -16,7 +19,7 @@ import pay.constant as pc
 class WeiLinPdfHandleParser(HandleParser):
 
     @staticmethod
-    def _new_line(df, line_list, line_info, start_word, bill_code_prefix, across_column, unit):
+    def _new_line(df, line_list, line_info: List[Any], start_word, bill_code_prefix, across_column, unit):
         material_list = []
         for index, l_t in enumerate(line_list):
             split_list = str(l_t).split()
@@ -41,7 +44,14 @@ class WeiLinPdfHandleParser(HandleParser):
                     line_info = line_info[0: across_column + 1] + line_info[i:]
                     break
         line_info[across_column] = line_info[across_column] + " " + " ".join(material_list)
-        df.loc[len(df.index)] = line_info
+        if len(line_info) == len(df.columns):
+            df.loc[len(df.index)] = line_info
+        elif len(line_info) < len(df.columns):
+            while len(line_info) < len(df.columns):
+                line_info.append("")
+            df.loc[len(df.index)] = line_info
+        else:
+            logger.warning(f"[{line_info}]丢弃")
 
     def handle_parser(self, file_dict, file_info, use_column_list, attribute_manager):
         # 文件是否存在
@@ -58,7 +68,7 @@ class WeiLinPdfHandleParser(HandleParser):
         # 跨行列
         across_column = int(attribute_manager.value(pc.across_column))
         # 排除行
-        exclude_line_list = ("應付小計:", "備注:", "應扣", "除帳小計", "扣%金額", "贊助金", "總合計", "核准")
+        exclude_line_list = ("應付小計:", "備注:", "應扣小計:", "除帳小計", "扣%金額", "贊助金", "總合計", "核准")
         # 单位
         unit = attribute_manager.value(pc.unit)
         if unit is None:
@@ -80,10 +90,10 @@ class WeiLinPdfHandleParser(HandleParser):
             # DataFrame
             df = pandas.DataFrame(columns=[str(r) for r in range(0, column_number)])
             if len(text_list) > 0:
-                start_word = ["除帳", "應付"]
+                start_word = ["除帳", "應付", "應扣"]
                 new_line = False
                 line_list = []
-                line_info = []
+                line_info: List[Any] = []
                 for text in text_list:
                     split_list = text.split()
                     if len(split_list) > 0:
