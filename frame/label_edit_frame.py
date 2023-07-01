@@ -72,6 +72,8 @@ class LabelEditFrame(ttk.Frame):
         self.cb_state = kwargs.pop("cb_state", "readonly")
         # 编辑框是否铺满
         self.edit_fill = kwargs.pop("edit_fill", True)
+        # 多行
+        self.multi_line = kwargs.pop("multi_line", False)
         # 基类
         super().__init__(master, **kwargs)
         # 时间类型
@@ -159,7 +161,8 @@ class LabelEditFrame(ttk.Frame):
         box = DetailMessageBox(title="文件", value=self.value.get())
         box.show()
         if box.result:
-            box.result.replace("\n", "")
+            if not self.multi_line:
+                box.result.replace("\n", "")
             self.value.set(box.result)
 
     def command_file(self):

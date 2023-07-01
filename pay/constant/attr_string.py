@@ -72,4 +72,7 @@ location_back_currency: str = "location_back_currency"
 location_phone: str = "location_phone"
 
 # 文件名称
-datafile: str = "数据文件"
+datafile: str = "datafile"
+
+# 信息
+info: str = "info"

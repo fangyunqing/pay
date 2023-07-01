@@ -144,3 +144,10 @@ datafile_attr = Attribute(name=attr_string.datafile,
                           text="数据文件",
                           data_type="str",
                           required=True)
+
+# 信息
+info_attr = Attribute(name=attr_string.info,
+                      text="信息",
+                      data_type="str",
+                      required=True,
+                      multi_line=True)

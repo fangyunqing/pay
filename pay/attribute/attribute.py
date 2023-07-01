@@ -32,4 +32,6 @@ class Attribute:
 
     value: str = field(default="")
 
+    multi_line: bool = False
+
 

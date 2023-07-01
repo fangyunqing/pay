@@ -70,7 +70,8 @@ class SetFrame(ttk.Frame):
                                         entry_type=attribute.data_type,
                                         cb_values=attribute.cb_values,
                                         label_width=12,
-                                        label_wrap_length=80)
+                                        label_wrap_length=80,
+                                        multi_line=attribute.multi_line)
                     cf.pack(side=ttk.TOP, fill=ttk.X, padx=10, pady=10)
                     option_value[attribute.name] = cf.value
 
